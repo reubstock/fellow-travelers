@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fellow Travelers</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">
+    <img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">
+    Fellow Travelers
+  </a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/events.html">Find Others</a></li>
+    <li><a href="/members.html">Members</a></li>
+    <li><a href="/gallery.html">Gallery</a></li>
+    <li><a href="/about.html">About</a></li>
+  </ul>
+  <button class="nav-toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-map"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-emblem">✦</div>
+    <h1>Fellow Travelers</h1>
+    <p class="tagline">A brotherhood without borders. Men who seek, wander, and return with stories.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-stats" id="hero-stats">
+      <div class="stat">
+        <span class="stat-number" id="stat-members">—</span>
+        <span class="stat-label">Members</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number" id="stat-countries">—</span>
+        <span class="stat-label">Countries</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number" id="stat-events">—</span>
+        <span class="stat-label">Upcoming Events</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="/events.html" class="btn btn-primary">View Upcoming Events</a>
+      <a href="/about.html" class="btn btn-outline">Our Story</a>
+    </div>
+  </div>
+</section>
+
+<!-- TRAIN IMAGE BANNER -->
+<div class="train-banner">
+  <img src="/images/hero-train.png" alt="Fellow Travelers — men pulling each other aboard a moving train" />
+  <div class="train-banner-caption">
+    <span>No man left behind. No journey taken alone.</span>
+  </div>
+</div>
+
+<!-- UPCOMING EVENTS PREVIEW -->
+<section class="section">
+  <div class="section-header">
+    <p class="section-label">On The Horizon</p>
+    <h2 class="section-title">Upcoming <span>Gatherings</span></h2>
+    <div class="section-rule"></div>
+  </div>
+  <div class="events-grid" id="home-events">
+    <div class="loading">Loading events…</div>
+  </div>
+  <div style="text-align:center;margin-top:2.5rem;">
+    <a href="/events.html" class="btn btn-outline">See All Events</a>
+  </div>
+</section>
+
+<!-- MEMBERS PREVIEW -->
+<section class="section" style="padding-top:0;">
+  <div class="section-header">
+    <p class="section-label">Our Brotherhood</p>
+    <h2 class="section-title">Meet the <span>Travelers</span></h2>
+    <div class="section-rule"></div>
+  </div>
+  <div class="members-grid" id="home-members">
+    <div class="loading">Loading members…</div>
+  </div>
+  <div style="text-align:center;margin-top:2.5rem;">
+    <a href="/members.html" class="btn btn-outline">Full Directory</a>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Ready to Join the Journey?</h2>
+  <p>Fellowship is earned through curiosity, respect, and a willingness to show up — wherever in the world that may be.</p>
+  <a href="/about.html#join" class="btn btn-primary">Apply for Membership</a>
+</div>
+
+<footer>
+  <div class="footer-brand">✦ Fellow Travelers</div>
+  <p>A global brotherhood, gathering since 2010 &middot; Wherever you roam, you are not alone.</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>
+  async function loadHomeData() {
+    try {
+      const [membersRes, eventsRes] = await Promise.all([
+        fetch('/api/members'),
+        fetch('/api/events?upcoming=true'),
+      ]);
+      const members = await membersRes.json();
+      const events = await eventsRes.json();
+
+      // Stats
+      const countries = new Set(members.map(m => m.country)).size;
+      document.getElementById('stat-members').textContent = members.length;
+      document.getElementById('stat-countries').textContent = countries;
+      document.getElementById('stat-events').textContent = events.length;
+
+      // Events preview (first 3)
+      const eventsEl = document.getElementById('home-events');
+      if (events.length === 0) {
+        eventsEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No upcoming events.</p></div>';
+      } else {
+        eventsEl.innerHTML = events.slice(0, 3).map(renderEventCard).join('');
+      }
+
+      // Members preview (first 4)
+      const membersEl = document.getElementById('home-members');
+      membersEl.innerHTML = members.slice(0, 4).map(renderMemberCard).join('');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function renderEventCard(ev) {
+    const d = new Date(ev.date + 'T00:00:00');
+    const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+    const day = d.getDate();
+    return `
+      <div class="card event-card">
+        <div class="event-date-badge">
+          <span class="month">${month}</span>
+          <span class="day">${day}</span>
+        </div>
+        <h3>${ev.title}</h3>
+        <div class="event-meta">
+          <span>📍 ${ev.location}, ${ev.country}</span>
+          ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
+          ${ev.host_name ? `<span>👤 ${ev.host_name}</span>` : ''}
+        </div>
+        ${ev.description ? `<p>${ev.description}</p>` : ''}
+      </div>`;
+  }
+
+  function renderMemberCard(m) {
+    const initials = m.name.split(' ').map(n => n[0]).join('');
+    return `
+      <div class="card member-card">
+        <div class="member-avatar">${initials}</div>
+        <h3>${m.name}</h3>
+        <div class="member-location">📍 ${m.location}, ${m.country}</div>
+        ${m.bio ? `<p>${m.bio}</p>` : ''}
+        ${m.joined_year ? `<span class="member-year">Member since ${m.joined_year}</span>` : ''}
+      </div>`;
+  }
+
+  loadHomeData();
+</script>
+</body>
+</html>

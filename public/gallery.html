@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Fellow Travelers</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand"><img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/events.html">Find Others</a></li>
+    <li><a href="/members.html">Members</a></li>
+    <li><a href="/gallery.html">Gallery</a></li>
+    <li><a href="/about.html">About</a></li>
+  </ul>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="page-header">
+  <h1>The Gallery</h1>
+  <p>Moments captured across the globe — proof that every journey leaves a mark.</p>
+</div>
+
+<section class="section">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:2rem;">
+    <button class="btn btn-sm btn-outline" onclick="openModal()">+ Upload Photo</button>
+  </div>
+
+  <div class="gallery-grid" id="gallery-grid">
+    <div class="loading" style="column-span:all;">Loading gallery…</div>
+  </div>
+
+  <div class="empty-state" id="gallery-empty" style="display:none;">
+    <div class="empty-icon">📷</div>
+    <p>No photos yet. Be the first to share a memory.</p>
+    <button class="btn btn-outline" style="margin-top:1rem;" onclick="openModal()">Upload a Photo</button>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
+<!-- Upload Modal -->
+<div class="modal-backdrop" id="upload-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>Upload a Photo</h3>
+    <form id="upload-form" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Photo *</label>
+        <input type="file" name="photo" accept="image/*" required style="color:var(--text);" />
+      </div>
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" required />
+      </div>
+      <div class="form-group">
+        <label>Caption</label>
+        <textarea name="caption" placeholder="Tell us about this moment…"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" name="location" />
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input type="number" name="year" min="2000" max="2099" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Upload</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">✦ Fellow Travelers</div>
+  <p>A global brotherhood &middot; Wherever you roam, you are not alone.</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>
+  async function loadGallery() {
+    const res = await fetch('/api/photos');
+    const photos = await res.json();
+    const grid = document.getElementById('gallery-grid');
+    const empty = document.getElementById('gallery-empty');
+
+    if (photos.length === 0) {
+      grid.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    grid.innerHTML = photos.map(p => `
+      <div class="gallery-item" onclick="openLightbox('/uploads/${p.filename}', '${escHtml(p.title)}')">
+        <img src="/uploads/${p.filename}" alt="${escHtml(p.title)}" loading="lazy" />
+        <div class="gallery-item-overlay">
+          <h4>${escHtml(p.title)}</h4>
+          ${p.location ? `<span>📍 ${escHtml(p.location)}${p.year ? ' · ' + p.year : ''}</span>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openLightbox(src, alt) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox-img').alt = alt;
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  function openModal() { document.getElementById('upload-modal').classList.add('open'); }
+  function closeModal() { document.getElementById('upload-modal').classList.remove('open'); }
+
+  document.getElementById('upload-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  document.getElementById('upload-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('[type=submit]');
+    btn.textContent = 'Uploading…';
+    btn.disabled = true;
+    const formData = new FormData(e.target);
+    const res = await fetch('/api/photos', { method: 'POST', body: formData });
+    btn.textContent = 'Upload';
+    btn.disabled = false;
+    if (res.ok) {
+      closeModal();
+      e.target.reset();
+      loadGallery();
+    } else {
+      alert('Upload failed. Please try again.');
+    }
+  });
+
+  loadGallery();
+</script>
+</body>
+</html>

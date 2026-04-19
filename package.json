@@ -1,0 +1,17 @@
+{
+  "name": "fellow-travelers",
+  "version": "1.0.0",
+  "description": "Website for the Fellow Travelers men's club",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^2.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

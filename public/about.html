@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Fellow Travelers</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand"><img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/events.html">Find Others</a></li>
+    <li><a href="/members.html">Members</a></li>
+    <li><a href="/gallery.html">Gallery</a></li>
+    <li><a href="/about.html">About</a></li>
+  </ul>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="page-header">
+  <h1>Our Story</h1>
+  <p>How a handful of wanderers became a brotherhood without borders.</p>
+</div>
+
+<!-- ABOUT SECTION -->
+<section class="section">
+  <div class="about-layout">
+    <div class="about-text">
+      <h2>Who We <span>Are</span></h2>
+      <p>We are explorers, craftsmen, storytellers, scientists, and builders. We come from different cultures and speak different languages, but we move through the world in the same spirit.</p>
+      <p>There are no ranks and no headquarters. There is only the standing invitation: show up, bring your full self, and be ready to be changed by what you find.</p>
+      <div style="margin-top:2rem;">
+        <a href="#join" class="btn btn-primary">Apply for Membership</a>
+      </div>
+    </div>
+
+    <div class="about-pillars">
+      <div class="pillar">
+        <div class="pillar-icon">🌍</div>
+        <div>
+          <h4>A Brotherhood Without Borders</h4>
+          <p>Our chapters meet wherever members live — and wherever they wander.</p>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🤝</div>
+        <div>
+          <h4>Earned, Not Bought</h4>
+          <p>Membership is by invitation and mutual recognition. We look for men of character, not résumé.</p>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🔥</div>
+        <div>
+          <h4>Real Experiences</h4>
+          <p>We're interested in the mountains you've climbed, physically and emotionally. Be seen. Be understood. Help others.</p>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">📖</div>
+        <div>
+          <h4>Stories Worth Telling</h4>
+          <p>Every member carries stories from the road. We gather to share them, and to make new ones together.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="section" style="padding-top:0;">
+  <div class="section-header">
+    <p class="section-label">The Journey So Far</p>
+    <h2 class="section-title">Our <span>History</span></h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div style="max-width:680px;margin:0 auto;position:relative;">
+    <div style="position:absolute;left:20px;top:0;bottom:0;width:2px;background:var(--border);"></div>
+    <div id="timeline"></div>
+  </div>
+</section>
+
+<!-- JOIN -->
+<div class="cta-section" id="join">
+  <h2>Apply for Membership</h2>
+  <p>We're always looking for the right kind of man — curious, open, and willing to show up wherever the road leads.</p>
+
+  <div style="max-width:520px;margin:2rem auto 0;text-align:left;">
+    <form id="join-form">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" name="name" required />
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" name="email" required />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" name="city" />
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <input type="text" name="country" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Who referred you? (if applicable)</label>
+        <input type="text" name="referral" />
+      </div>
+      <div class="form-group">
+        <label>Why do you want to join? *</label>
+        <textarea name="message" required placeholder="Tell us about yourself and what draws you to Fellow Travelers…" style="min-height:120px;"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Submit Application</button>
+    </form>
+    <div id="join-success" style="display:none;text-align:center;padding:2rem;color:var(--gold);">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">✦</div>
+      <h3 style="margin-bottom:0.5rem;">Application Received</h3>
+      <p style="color:var(--muted);">We'll be in touch. Safe travels until then.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">✦ Fellow Travelers</div>
+  <p>A global brotherhood, gathering since 2010 &middot; Wherever you roam, you are not alone.</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>
+  const history = [
+    { year: '30 BCE', text: '8 men met by candle light in a cave in Tsvat. What they discovered was so important they swore it to secrecy.' },
+    { year: 2012, text: 'One man, our founder, believed important things should be remembered. He wrote their message on a scroll. Its message was simple. "Find the others and help them".' },
+    { year: 2013, text: 'Tokyo chapter launches. First trans-Pacific gathering held on the Izu Peninsula.' },
+    { year: 2015, text: 'African chapter established in Accra. Annual Patagonia trek begins as a tradition.' },
+    { year: 2017, text: 'Arctic expedition organized by the Stockholm chapter — 11 members, 30 days above the Arctic Circle.' },
+    { year: 2019, text: 'Membership reaches 50 across 22 countries. First official emblem adopted: the eight-pointed star.' },
+    { year: 2022, text: 'First gathering on all six inhabited continents in a single calendar year.' },
+    { year: 2024, text: 'This website launched. The journey continues.' },
+  ];
+
+  document.getElementById('timeline').innerHTML = history.map(h => `
+    <div style="display:flex;gap:1.5rem;margin-bottom:2rem;padding-left:0.5rem;">
+      <div style="position:relative;flex-shrink:0;">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--gold);margin-top:4px;position:relative;z-index:1;"></div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;flex:1;">
+        <div style="font-size:0.75rem;letter-spacing:0.1em;color:var(--gold);font-family:Arial,sans-serif;margin-bottom:0.4rem;">${h.year}</div>
+        <p style="color:var(--muted);font-size:0.9rem;line-height:1.5;">${h.text}</p>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('join-form').addEventListener('submit', e => {
+    e.preventDefault();
+    document.getElementById('join-form').style.display = 'none';
+    document.getElementById('join-success').style.display = 'block';
+  });
+</script>
+</body>
+</html>

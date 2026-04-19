@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Others — Fellow Travelers</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    #events-map {
+      height: 460px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin: 0 2rem 4rem;
+      max-width: 1156px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Dark Leaflet popup to match theme */
+    .leaflet-popup-content-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      color: var(--text);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .leaflet-popup-tip { background: var(--surface); }
+    .leaflet-popup-content { margin: 1rem 1.1rem; font-family: Georgia, serif; }
+    .leaflet-popup-content h4 { color: var(--gold); margin-bottom: 0.3rem; font-size: 0.95rem; }
+    .leaflet-popup-content p { color: var(--muted); font-size: 0.82rem; margin: 0; font-family: Arial, sans-serif; }
+    .map-section-header {
+      text-align: center;
+      padding: 0 2rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand"><img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/events.html">Find Others</a></li>
+    <li><a href="/members.html">Members</a></li>
+    <li><a href="/gallery.html">Gallery</a></li>
+    <li><a href="/about.html">About</a></li>
+  </ul>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="page-header">
+  <h1>Find Others</h1>
+  <p>From Arctic expeditions to tropical feasts — every event is a chapter worth writing.</p>
+</div>
+
+<!-- Map -->
+<div class="map-section-header">
+  <h2 class="section-title">Where We <span>Gather</span></h2>
+  <div class="section-rule"></div>
+</div>
+<div id="events-map"></div>
+
+<section class="section">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+    <div style="display:flex;gap:0.75rem;">
+      <button class="btn btn-sm btn-primary" id="filter-upcoming" onclick="setFilter('upcoming')">Upcoming</button>
+      <button class="btn btn-sm btn-outline" id="filter-all" onclick="setFilter('all')">All Events</button>
+    </div>
+    <button class="btn btn-sm btn-outline" onclick="openModal()">+ Add Event</button>
+  </div>
+
+  <div class="events-grid" id="events-list">
+    <div class="loading">Loading events…</div>
+  </div>
+</section>
+
+<!-- Add Event Modal -->
+<div class="modal-backdrop" id="event-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>Add New Event</h3>
+    <form id="event-form">
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" required />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>City / Location *</label>
+          <input type="text" name="location" required />
+        </div>
+        <div class="form-group">
+          <label>Country *</label>
+          <input type="text" name="country" required />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" name="date" required />
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <input type="time" name="time" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Host Name</label>
+        <input type="text" name="host_name" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Add Event</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">✦ Fellow Travelers</div>
+  <p>A global brotherhood &middot; Wherever you roam, you are not alone.</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/nav.js"></script>
+<script>
+  let currentFilter = 'upcoming';
+  let map, markersLayer;
+
+  // Initialise dark map
+  function initMap() {
+    map = L.map('events-map', { zoomControl: true, scrollWheelZoom: false }).setView([20, 10], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 18,
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+
+  const goldIcon = L.divIcon({
+    className: '',
+    html: `<div style="
+      width:14px;height:14px;border-radius:50%;
+      background:#c9a84c;border:2px solid #e8c870;
+      box-shadow:0 0 8px rgba(201,168,76,0.7);">
+    </div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -10],
+  });
+
+  async function geocode(location, country) {
+    const q = encodeURIComponent(`${location}, ${country}`);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      const data = await res.json();
+      if (data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    } catch (e) {}
+    return null;
+  }
+
+  async function plotEvents(events) {
+    markersLayer.clearLayers();
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i];
+      if (i > 0) await new Promise(r => setTimeout(r, 1100)); // respect Nominatim rate limit
+      const coords = await geocode(ev.location, ev.country);
+      if (!coords) continue;
+      const d = new Date(ev.date + 'T00:00:00');
+      const dateStr = d.toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' });
+      L.marker([coords.lat, coords.lng], { icon: goldIcon })
+        .bindPopup(`<h4>${ev.title}</h4><p>📍 ${ev.location}, ${ev.country}</p><p>📅 ${dateStr}${ev.host_name ? '<br>👤 ' + ev.host_name : ''}</p>`)
+        .addTo(markersLayer);
+    }
+  }
+
+  async function loadEvents() {
+    const el = document.getElementById('events-list');
+    el.innerHTML = '<div class="loading">Loading…</div>';
+    const url = currentFilter === 'upcoming' ? '/api/events?upcoming=true' : '/api/events';
+    const res = await fetch(url);
+    const events = await res.json();
+
+    if (events.length === 0) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No events found.</p></div>';
+      markersLayer.clearLayers();
+      return;
+    }
+
+    el.innerHTML = events.map(ev => {
+      const d = new Date(ev.date + 'T00:00:00');
+      const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+      const day = d.getDate();
+      const year = d.getFullYear();
+      return `
+        <div class="card event-card">
+          <div class="event-date-badge">
+            <span class="month">${month}</span>
+            <span class="day">${day}</span>
+          </div>
+          <h3>${ev.title}</h3>
+          <div class="event-meta">
+            <span>📍 ${ev.location}, ${ev.country}</span>
+            ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
+            ${ev.host_name ? `<span>👤 ${ev.host_name}</span>` : ''}
+            <span>📅 ${year}</span>
+          </div>
+          ${ev.description ? `<p>${ev.description}</p>` : ''}
+        </div>`;
+    }).join('');
+
+    plotEvents(events);
+  }
+
+  function setFilter(f) {
+    currentFilter = f;
+    document.getElementById('filter-upcoming').className = f === 'upcoming' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    document.getElementById('filter-all').className = f === 'all' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    loadEvents();
+  }
+
+  function openModal() { document.getElementById('event-modal').classList.add('open'); }
+  function closeModal() { document.getElementById('event-modal').classList.remove('open'); }
+
+  document.getElementById('event-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  document.getElementById('event-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const res = await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      closeModal();
+      e.target.reset();
+      loadEvents();
+    } else {
+      alert('Failed to add event. Please check required fields.');
+    }
+  });
+
+  initMap();
+  loadEvents();
+</script>
+</body>
+</html>

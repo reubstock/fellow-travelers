@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Members — Fellow Travelers</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand"><img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/events.html">Find Others</a></li>
+    <li><a href="/members.html">Members</a></li>
+    <li><a href="/gallery.html">Gallery</a></li>
+    <li><a href="/about.html">About</a></li>
+  </ul>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="page-header">
+  <h1>The Directory</h1>
+  <p>Men from every corner of the world, bound by curiosity and camaraderie.</p>
+</div>
+
+<section class="section">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+    <input
+      type="text"
+      id="member-search"
+      placeholder="Search by name, city, or country…"
+      style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:0.6rem 1rem;color:var(--text);font-family:Georgia,serif;font-size:0.95rem;width:280px;"
+      oninput="filterMembers()"
+    />
+    <button class="btn btn-sm btn-outline" onclick="openModal()">+ Add Member</button>
+  </div>
+
+  <div class="members-grid" id="members-list">
+    <div class="loading">Loading members…</div>
+  </div>
+</section>
+
+<!-- Add Member Modal -->
+<div class="modal-backdrop" id="member-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>Add New Member</h3>
+    <form id="member-form">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" name="name" required />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>City *</label>
+          <input type="text" name="location" required />
+        </div>
+        <div class="form-group">
+          <label>Country *</label>
+          <input type="text" name="country" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Year Joined</label>
+        <input type="number" name="joined_year" min="2000" max="2099" />
+      </div>
+      <div class="form-group">
+        <label>Bio</label>
+        <textarea name="bio" placeholder="A line or two about this traveler…"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Add Member</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">✦ Fellow Travelers</div>
+  <p>A global brotherhood &middot; Wherever you roam, you are not alone.</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>
+  let allMembers = [];
+
+  async function loadMembers() {
+    const res = await fetch('/api/members');
+    allMembers = await res.json();
+    renderMembers(allMembers);
+  }
+
+  function renderMembers(members) {
+    const el = document.getElementById('members-list');
+    if (members.length === 0) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🌍</div><p>No members found.</p></div>';
+      return;
+    }
+    el.innerHTML = members.map(m => {
+      const initials = m.name.split(' ').map(n => n[0]).join('');
+      return `
+        <div class="card member-card">
+          <div class="member-avatar">${m.avatar_url ? `<img src="${m.avatar_url}" alt="${m.name}" />` : initials}</div>
+          <h3>${m.name}</h3>
+          <div class="member-location">📍 ${m.location}, ${m.country}</div>
+          ${m.bio ? `<p>${m.bio}</p>` : ''}
+          ${m.joined_year ? `<span class="member-year">Member since ${m.joined_year}</span>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function filterMembers() {
+    const q = document.getElementById('member-search').value.toLowerCase();
+    renderMembers(allMembers.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      m.location.toLowerCase().includes(q) ||
+      m.country.toLowerCase().includes(q)
+    ));
+  }
+
+  function openModal() { document.getElementById('member-modal').classList.add('open'); }
+  function closeModal() { document.getElementById('member-modal').classList.remove('open'); }
+
+  document.getElementById('member-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  document.getElementById('member-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const res = await fetch('/api/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      closeModal();
+      e.target.reset();
+      loadMembers();
+    } else {
+      alert('Failed to add member. Please check required fields.');
+    }
+  });
+
+  loadMembers();
+</script>
+</body>
+</html>
