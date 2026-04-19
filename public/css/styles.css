@@ -120,10 +120,10 @@ nav {
 .hero-map {
   position: absolute;
   inset: 0;
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/1200px-Blue_Marble_2002.png');
+  background-image: url('/images/hero-map.webp');
   background-size: cover;
   background-position: center;
-  opacity: 0.12;
+  opacity: 0.22;
 }
 
 .hero-overlay {

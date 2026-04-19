@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node server/index.js)",
+      "Bash(curl -s http://localhost:3000/api/members)",
+      "Bash(curl -s http://localhost:3000/api/events?upcoming=true)",
+      "Bash(curl -s \"http://localhost:3000/api/events?upcoming=true\")",
+      "Bash(python3 -c ' *)",
+      "Bash(find /Users/reubensteiger/Desktop -maxdepth 1 -name \"Screenshot 2026-04-19 at 1.36*\" -exec cp {} \"/Users/reubensteiger/Desktop/Fellow Travelers/public/images/hero-train.png\" \\\\;)",
+      "Bash(find /Users/reubensteiger/Desktop/\"Fellow Travelers\" -maxdepth 1 -name \"Screenshot 2026-04-19 at 1.36*\" -exec cp {} \"/Users/reubensteiger/Desktop/Fellow Travelers/public/images/hero-train.png\" \\\\;)",
+      "Bash(pkill -f \"node server/index.js\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/images/hero-train.png)",
+      "WebFetch(domain:buckpalmer.com)",
+      "WebFetch(domain:docs.google.com)",
+      "Bash(find ~/Downloads -maxdepth 1 -name \"ChatGPT Image Apr 5, 2026, 03_44*\" -exec cp {} \"/Users/reubensteiger/Desktop/Fellow Travelers/public/images/logo.png\" \\\\;)",
+      "Bash(gh repo *)",
+      "Bash(git --version)",
+      "Read(//usr/local/bin/**)",
+      "Bash(brew install *)",
+      "Bash(curl -sL https://github.com/cli/cli/releases/download/v2.49.2/gh_2.49.2_macOS_arm64.tar.gz -o /tmp/gh.tar.gz)",
+      "Bash(tar -xzf /tmp/gh.tar.gz -C /tmp)",
+      "Bash(sudo cp *)",
+      "Bash(gh --version)",
+      "Bash(curl -sL -o /tmp/gh.pkg \"https://github.com/cli/cli/releases/download/v2.49.2/gh_2.49.2_macOS_amd64.pkg\")",
+      "Read(//tmp/**)",
+      "Read(//Users/reubensteiger/.ssh/**)",
+      "Bash(ssh -T git@github.com)",
+      "Bash(ssh-keygen -t ed25519 -C \"reubstock@gmail.com\" -f ~/.ssh/id_ed25519 -N \"\")"
+    ]
+  }
+}
