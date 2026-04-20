@@ -1,7 +1,11 @@
 const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
 
-const db = new DatabaseSync(path.join(__dirname, '..', 'data', 'fellow_travelers.db'));
+const dbPath = process.env.VERCEL
+  ? '/tmp/fellow_travelers.db'
+  : path.join(__dirname, '..', 'data', 'fellow_travelers.db');
+
+const db = new DatabaseSync(dbPath);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS members (

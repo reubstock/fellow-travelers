@@ -2,11 +2,13 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure data and uploads directories exist
-['data', 'public/uploads'].forEach(dir => {
-  const full = path.join(__dirname, '..', dir);
-  if (!fs.existsSync(full)) fs.mkdirSync(full, { recursive: true });
-});
+// Ensure data and uploads directories exist (not needed on Vercel)
+if (!process.env.VERCEL) {
+  ['data', 'public/uploads'].forEach(dir => {
+    const full = path.join(__dirname, '..', dir);
+    if (!fs.existsSync(full)) fs.mkdirSync(full, { recursive: true });
+  });
+}
 
 const app = express();
 app.use(express.json());
