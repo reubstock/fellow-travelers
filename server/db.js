@@ -46,14 +46,14 @@ if (memberCount === 0) {
     VALUES (?, ?, ?, ?, ?)
   `);
   [
-    ['James Whitmore', 'London', 'United Kingdom', 'Avid sailor and whisky connoisseur. Has visited 72 countries.', 2010],
-    ['Rafael Souza', 'São Paulo', 'Brazil', 'Mountaineer and coffee farmer. Summited Kilimanjaro twice.', 2012],
-    ['Kenji Nakamura', 'Tokyo', 'Japan', 'Motorcycle traveler who rode from Tokyo to Istanbul.', 2013],
-    ['Matteo Romano', 'Milan', 'Italy', 'Architecture photographer and amateur chef.', 2015],
-    ['Samuel Osei', 'Accra', 'Ghana', 'Wildlife conservationist and bush pilot.', 2016],
-    ['Lars Eriksson', 'Stockholm', 'Sweden', 'Ice climber and polar expedition veteran.', 2017],
-    ['Diego Morales', 'Buenos Aires', 'Argentina', 'Tango teacher by night, fly fisherman by day.', 2018],
-    ['Arjun Mehta', 'Mumbai', 'India', 'Historian of the Silk Road and endurance cyclist.', 2019],
+    ['James Whitmore', 'London', 'United Kingdom', 'Avid sailor and whisky connoisseur. Has visited 72 countries.', 2026],
+    ['Rafael Souza', 'São Paulo', 'Brazil', 'Mountaineer and coffee farmer. Summited Kilimanjaro twice.', 2026],
+    ['Kenji Nakamura', 'Tokyo', 'Japan', 'Motorcycle traveler who rode from Tokyo to Istanbul.', 2026],
+    ['Matteo Romano', 'Milan', 'Italy', 'Architecture photographer and amateur chef.', 2026],
+    ['Samuel Osei', 'Accra', 'Ghana', 'Wildlife conservationist and bush pilot.', 2026],
+    ['Lars Eriksson', 'Stockholm', 'Sweden', 'Ice climber and polar expedition veteran.', 2026],
+    ['Diego Morales', 'Buenos Aires', 'Argentina', 'Tango teacher by night, fly fisherman by day.', 2026],
+    ['Arjun Mehta', 'Mumbai', 'India', 'Historian of the Silk Road and endurance cyclist.', 2026],
   ].forEach(m => ins.run(...m));
 }
 
