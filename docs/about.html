@@ -4,18 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About — Fellow Travelers</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
 <nav>
-  <a href="/" class="nav-brand"><img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
+  <a href="index.html" class="nav-brand"><img src="images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
   <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/events.html">Find Others</a></li>
-    <li><a href="/members.html">Members</a></li>
-    
-    <li><a href="/about.html">About</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="events.html">Find Others</a></li>
+    <li><a href="members.html">Members</a></li>
+    <li><a href="about.html">About</a></li>
   </ul>
   <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
 </nav>
@@ -134,9 +133,9 @@
   <p>A global brotherhood, gathering since 2010 &middot; Wherever you roam, you are not alone.</p>
 </footer>
 
-<script src="/js/nav.js"></script>
+<script src="js/nav.js"></script>
 <script>
-  const history = [
+  const historyData = [
     { year: '30 BCE', text: '8 men met by candle light in a cave in Tsvat. What they discovered was so important they swore it to secrecy.' },
     { year: 2012, text: 'One man, our founder, believed important things should be remembered. He wrote their message on a scroll. Its message was simple. "Find the others and help them".' },
     { year: 2013, text: 'Tokyo chapter launches. First trans-Pacific gathering held on the Izu Peninsula.' },
@@ -147,7 +146,7 @@
     { year: 2024, text: 'This website launched. The journey continues.' },
   ];
 
-  document.getElementById('timeline').innerHTML = history.map(h => `
+  document.getElementById('timeline').innerHTML = historyData.map(h => `
     <div style="display:flex;gap:1.5rem;margin-bottom:2rem;padding-left:0.5rem;">
       <div style="position:relative;flex-shrink:0;">
         <div style="width:12px;height:12px;border-radius:50%;background:var(--gold);margin-top:4px;position:relative;z-index:1;"></div>

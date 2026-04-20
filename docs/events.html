@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Find Others — Fellow Travelers</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     #events-map {
@@ -39,13 +39,12 @@
 <body>
 
 <nav>
-  <a href="/" class="nav-brand"><img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
+  <a href="index.html" class="nav-brand"><img src="images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
   <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/events.html">Find Others</a></li>
-    <li><a href="/members.html">Members</a></li>
-    
-    <li><a href="/about.html">About</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="events.html">Find Others</a></li>
+    <li><a href="members.html">Members</a></li>
+    <li><a href="about.html">About</a></li>
   </ul>
   <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
 </nav>
@@ -125,12 +124,11 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/js/nav.js"></script>
+<script src="js/nav.js"></script>
 <script>
   let currentFilter = 'upcoming';
   let map, markersLayer;
 
-  // Initialise dark map
   function initMap() {
     map = L.map('events-map', { zoomControl: true, scrollWheelZoom: false }).setView([20, 10], 2);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -169,7 +167,7 @@
     markersLayer.clearLayers();
     for (let i = 0; i < events.length; i++) {
       const ev = events[i];
-      if (i > 0) await new Promise(r => setTimeout(r, 1100)); // respect Nominatim rate limit
+      if (i > 0) await new Promise(r => setTimeout(r, 1100));
       const coords = await geocode(ev.location, ev.country);
       if (!coords) continue;
       const d = new Date(ev.date + 'T00:00:00');
@@ -183,39 +181,44 @@
   async function loadEvents() {
     const el = document.getElementById('events-list');
     el.innerHTML = '<div class="loading">Loading…</div>';
-    const url = currentFilter === 'upcoming' ? '/api/events?upcoming=true' : '/api/events';
-    const res = await fetch(url);
-    const events = await res.json();
+    try {
+      const url = currentFilter === 'upcoming' ? '/api/events?upcoming=true' : '/api/events';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('API unavailable');
+      const events = await res.json();
 
-    if (events.length === 0) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No events found.</p></div>';
-      markersLayer.clearLayers();
-      return;
+      if (events.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No events found.</p></div>';
+        markersLayer.clearLayers();
+        return;
+      }
+
+      el.innerHTML = events.map(ev => {
+        const d = new Date(ev.date + 'T00:00:00');
+        const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+        const day = d.getDate();
+        const year = d.getFullYear();
+        return `
+          <div class="card event-card">
+            <div class="event-date-badge">
+              <span class="month">${month}</span>
+              <span class="day">${day}</span>
+            </div>
+            <h3>${ev.title}</h3>
+            <div class="event-meta">
+              <span>📍 ${ev.location}, ${ev.country}</span>
+              ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
+              ${ev.host_name ? `<span>👤 ${ev.host_name}</span>` : ''}
+              <span>📅 ${year}</span>
+            </div>
+            ${ev.description ? `<p>${ev.description}</p>` : ''}
+          </div>`;
+      }).join('');
+
+      plotEvents(events);
+    } catch (e) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No upcoming events.</p></div>';
     }
-
-    el.innerHTML = events.map(ev => {
-      const d = new Date(ev.date + 'T00:00:00');
-      const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
-      const day = d.getDate();
-      const year = d.getFullYear();
-      return `
-        <div class="card event-card">
-          <div class="event-date-badge">
-            <span class="month">${month}</span>
-            <span class="day">${day}</span>
-          </div>
-          <h3>${ev.title}</h3>
-          <div class="event-meta">
-            <span>📍 ${ev.location}, ${ev.country}</span>
-            ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
-            ${ev.host_name ? `<span>👤 ${ev.host_name}</span>` : ''}
-            <span>📅 ${year}</span>
-          </div>
-          ${ev.description ? `<p>${ev.description}</p>` : ''}
-        </div>`;
-    }).join('');
-
-    plotEvents(events);
   }
 
   function setFilter(f) {
@@ -234,18 +237,22 @@
 
   document.getElementById('event-form').addEventListener('submit', async e => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
-    const res = await fetch('/api/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) {
-      closeModal();
-      e.target.reset();
-      loadEvents();
-    } else {
-      alert('Failed to add event. Please check required fields.');
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        closeModal();
+        e.target.reset();
+        loadEvents();
+      } else {
+        alert('Failed to add event. Please check required fields.');
+      }
+    } catch (err) {
+      alert('Adding events requires the backend server.');
     }
   });
 

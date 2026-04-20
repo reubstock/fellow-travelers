@@ -4,18 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Members — Fellow Travelers</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
 <nav>
-  <a href="/" class="nav-brand"><img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
+  <a href="index.html" class="nav-brand"><img src="images/logo.png" alt="Fellow Travelers logo" class="nav-logo">Fellow Travelers</a>
   <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/events.html">Find Others</a></li>
-    <li><a href="/members.html">Members</a></li>
-    
-    <li><a href="/about.html">About</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="events.html">Find Others</a></li>
+    <li><a href="members.html">Members</a></li>
+    <li><a href="about.html">About</a></li>
   </ul>
   <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
 </nav>
@@ -80,14 +79,20 @@
   <p>A global brotherhood &middot; Wherever you roam, you are not alone.</p>
 </footer>
 
-<script src="/js/nav.js"></script>
+<script src="js/nav.js"></script>
 <script>
   let allMembers = [];
 
   async function loadMembers() {
-    const res = await fetch('/api/members');
-    allMembers = await res.json();
-    renderMembers(allMembers);
+    try {
+      const res = await fetch('/api/members');
+      if (!res.ok) throw new Error('API unavailable');
+      allMembers = await res.json();
+      renderMembers(allMembers);
+    } catch (e) {
+      document.getElementById('members-list').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">🌍</div><p>Member directory available when running with backend server.</p></div>';
+    }
   }
 
   function renderMembers(members) {
@@ -127,18 +132,22 @@
 
   document.getElementById('member-form').addEventListener('submit', async e => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
-    const res = await fetch('/api/members', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) {
-      closeModal();
-      e.target.reset();
-      loadMembers();
-    } else {
-      alert('Failed to add member. Please check required fields.');
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      const res = await fetch('/api/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        closeModal();
+        e.target.reset();
+        loadMembers();
+      } else {
+        alert('Failed to add member. Please check required fields.');
+      }
+    } catch (err) {
+      alert('Adding members requires the backend server.');
     }
   });
 

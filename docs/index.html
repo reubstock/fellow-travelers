@@ -4,21 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fellow Travelers</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
 <nav>
-  <a href="/" class="nav-brand">
-    <img src="/images/logo.png" alt="Fellow Travelers logo" class="nav-logo">
+  <a href="index.html" class="nav-brand">
+    <img src="images/logo.png" alt="Fellow Travelers logo" class="nav-logo">
     Fellow Travelers
   </a>
   <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/events.html">Find Others</a></li>
-    <li><a href="/members.html">Members</a></li>
-    
-    <li><a href="/about.html">About</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="events.html">Find Others</a></li>
+    <li><a href="members.html">Members</a></li>
+    <li><a href="about.html">About</a></li>
   </ul>
   <button class="nav-toggle" aria-label="Toggle menu">
     <span></span><span></span><span></span>
@@ -34,14 +33,14 @@
     <h1>Fellow Travelers</h1>
     <p class="tagline">A brotherhood without borders. Men who seek, wander, and return with stories.</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-      <a href="/events.html" class="btn btn-primary">View Gatherings</a>
+      <a href="events.html" class="btn btn-primary">View Gatherings</a>
     </div>
   </div>
 </section>
 
 <!-- TRAIN IMAGE BANNER -->
 <div class="train-banner">
-  <img src="/images/hero-train.png" alt="Fellow Travelers — men pulling each other aboard a moving train" />
+  <img src="images/hero-train.png" alt="Fellow Travelers — men pulling each other aboard a moving train" />
   <div class="train-banner-caption">
     <span>No man left behind. No journey taken alone.</span>
   </div>
@@ -58,7 +57,7 @@
     <div class="loading">Loading events…</div>
   </div>
   <div style="text-align:center;margin-top:2.5rem;">
-    <a href="/events.html" class="btn btn-outline">See All Events</a>
+    <a href="events.html" class="btn btn-outline">See All Events</a>
   </div>
 </section>
 
@@ -73,7 +72,7 @@
     <div class="loading">Loading members…</div>
   </div>
   <div style="text-align:center;margin-top:2.5rem;">
-    <a href="/members.html" class="btn btn-outline">Full Directory</a>
+    <a href="members.html" class="btn btn-outline">Full Directory</a>
   </div>
 </section>
 
@@ -81,7 +80,7 @@
 <div class="cta-section">
   <h2>Ready to Join the Journey?</h2>
   <p>Fellowship is earned through curiosity, respect, and a willingness to show up — wherever in the world that may be.</p>
-  <a href="/about.html#join" class="btn btn-primary">Apply for Membership</a>
+  <a href="about.html#join" class="btn btn-primary">Apply for Membership</a>
 </div>
 
 <footer>
@@ -89,7 +88,7 @@
   <p>A global brotherhood, gathering since 2010 &middot; Wherever you roam, you are not alone.</p>
 </footer>
 
-<script src="/js/nav.js"></script>
+<script src="js/nav.js"></script>
 <script>
   async function loadHomeData() {
     try {
@@ -97,16 +96,10 @@
         fetch('/api/members'),
         fetch('/api/events?upcoming=true'),
       ]);
+      if (!membersRes.ok || !eventsRes.ok) throw new Error('API unavailable');
       const members = await membersRes.json();
       const events = await eventsRes.json();
 
-      // Stats
-      const countries = new Set(members.map(m => m.country)).size;
-      document.getElementById('stat-members').textContent = members.length;
-      document.getElementById('stat-countries').textContent = countries;
-      document.getElementById('stat-events').textContent = events.length;
-
-      // Events preview (first 3)
       const eventsEl = document.getElementById('home-events');
       if (events.length === 0) {
         eventsEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No upcoming events.</p></div>';
@@ -114,11 +107,13 @@
         eventsEl.innerHTML = events.slice(0, 3).map(renderEventCard).join('');
       }
 
-      // Members preview (first 4)
       const membersEl = document.getElementById('home-members');
       membersEl.innerHTML = members.slice(0, 4).map(renderMemberCard).join('');
     } catch (e) {
-      console.error(e);
+      document.getElementById('home-events').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">🗓</div><p>No upcoming events.</p></div>';
+      document.getElementById('home-members').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">🌍</div><p>Member directory available when running with backend server.</p></div>';
     }
   }
 

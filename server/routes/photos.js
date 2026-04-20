@@ -5,7 +5,7 @@ const path = require('path');
 const db = require('../db');
 
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '..', '..', 'public', 'uploads'),
+  destination: path.join(__dirname, '..', '..', 'docs', 'uploads'),
   filename: (req, file, cb) => {
     const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, unique + path.extname(file.originalname));

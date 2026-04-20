@@ -1,9 +1,9 @@
 // Highlight active nav link and handle mobile toggle
 (function () {
-  const page = location.pathname.replace(/\/$/, '') || '/';
+  const filename = location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-links a').forEach(a => {
-    const href = a.getAttribute('href').replace(/\/$/, '') || '/';
-    if (page === href || (href !== '/' && page.startsWith(href))) {
+    const href = a.getAttribute('href').replace(/#.*$/, '');
+    if (href === filename || (filename === '' && href === 'index.html')) {
       a.classList.add('active');
     }
   });
