@@ -85,9 +85,14 @@
   let allMembers = [];
 
   async function loadMembers() {
-    const res = await fetch('/api/members');
-    allMembers = await res.json();
-    renderMembers(allMembers);
+    try {
+      const res = await fetch('/api/members');
+      allMembers = await res.json();
+      renderMembers(allMembers);
+    } catch (e) {
+      document.getElementById('members-list').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load members. Is the server running?</p></div>';
+    }
   }
 
   function renderMembers(members) {

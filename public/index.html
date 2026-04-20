@@ -100,12 +100,6 @@
       const members = await membersRes.json();
       const events = await eventsRes.json();
 
-      // Stats
-      const countries = new Set(members.map(m => m.country)).size;
-      document.getElementById('stat-members').textContent = members.length;
-      document.getElementById('stat-countries').textContent = countries;
-      document.getElementById('stat-events').textContent = events.length;
-
       // Events preview (first 3)
       const eventsEl = document.getElementById('home-events');
       if (events.length === 0) {
