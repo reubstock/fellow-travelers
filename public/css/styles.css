@@ -768,6 +768,7 @@ footer .footer-brand {
     top: 64px;
     left: 0;
     right: 0;
+    z-index: 99;
     background: var(--bg);
     border-bottom: 1px solid var(--border);
     flex-direction: column;
@@ -778,13 +779,32 @@ footer .footer-brand {
   .nav-links.open { display: flex; }
   .nav-toggle { display: flex; }
 
+  .section { padding: 3rem 1.25rem; }
+  .cta-section { padding: 3rem 1.25rem; }
+  .page-header { padding: 2rem 1.25rem 1.5rem; }
+
   .hero-stats { gap: 1.5rem; }
   .about-layout { grid-template-columns: 1fr; gap: 2.5rem; }
   .gallery-grid { columns: 2; }
+
+  #events-map { height: 380px; margin: 0 1rem 2.5rem; }
+
+  .form-row { grid-template-columns: 1fr !important; }
+
+  #member-search { width: 100% !important; }
 }
 
 @media (max-width: 480px) {
+  nav { padding: 0 1rem; }
+
   .gallery-grid { columns: 1; }
   .events-grid { grid-template-columns: 1fr; }
   .members-grid { grid-template-columns: 1fr 1fr; }
+
+  .hero { min-height: 75vh; }
+  .hero-emblem { font-size: 2.5rem; }
+
+  .train-banner { max-height: 280px; }
+
+  #events-map { height: 300px; margin: 0 0 2rem; border-radius: 0; border-left: none; border-right: none; }
 }
