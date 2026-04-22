@@ -14,11 +14,11 @@ const members = [
 ];
 
 const events = [
-  { id: 1, title: 'Midsummer Gathering',    description: 'Annual midsummer celebration on the Stockholm archipelago. Sailing, sauna, and open fires.', location: 'Stockholm',  country: 'Sweden',         date: '2026-06-20', time: '18:00', host_name: 'Lars Eriksson' },
-  { id: 2, title: 'Tokyo Chapter Dinner',   description: 'Formal dinner at a traditional kappo restaurant in Ginza. Dress code: smart.',               location: 'Tokyo',       country: 'Japan',          date: '2026-07-12', time: '19:30', host_name: 'Kenji Nakamura' },
-  { id: 3, title: 'Patagonia Trek',         description: 'Five-day guided trek through Torres del Paine. Limited to 12 members.',                       location: 'Patagonia',   country: 'Argentina',      date: '2026-09-05', time: '07:00', host_name: 'Diego Morales' },
-  { id: 4, title: 'Accra Harvest Festival', description: 'A celebration of harvest season with local food, drumming, and a dawn hike.',                 location: 'Accra',       country: 'Ghana',          date: '2026-10-18', time: '10:00', host_name: 'Samuel Osei' },
-  { id: 5, title: 'London Winter Symposium',description: 'Annual meeting with guest speakers, awards, and a black-tie dinner at the Travellers Club.',  location: 'London',      country: 'United Kingdom', date: '2026-12-05', time: '18:30', host_name: 'James Whitmore' },
+  { id: 1, title: 'SF Dinner — June',       description: 'Monthly dinner at a member\'s home in San Francisco.',                                         location: 'San Francisco', country: 'United States', date: '2026-06-20', time: '18:00', host_name: 'Reuben Steiger' },
+  { id: 2, title: 'SF Dinner — July',       description: 'Monthly dinner at a member\'s home in San Francisco.',                                         location: 'San Francisco', country: 'United States', date: '2026-07-12', time: '18:00', host_name: 'Reuben Steiger' },
+  { id: 3, title: 'SF Dinner — August',     description: 'Monthly dinner at a member\'s home in San Francisco.',                                         location: 'San Francisco', country: 'United States', date: '2026-08-15', time: '18:00', host_name: 'Reuben Steiger' },
+  { id: 4, title: 'Princeton Dinner',       description: 'Dinner at a member\'s home in Princeton, NJ.',                                                 location: 'Princeton',     country: 'United States', date: '2026-10-18', time: '18:30', host_name: 'Reuben Steiger' },
+  { id: 5, title: 'Princeton Winter Dinner',description: 'End of year gathering at a member\'s home in Princeton, NJ.',                                  location: 'Princeton',     country: 'United States', date: '2026-12-05', time: '18:30', host_name: 'Reuben Steiger' },
 ];
 
 const today = () => new Date().toISOString().split('T')[0];
