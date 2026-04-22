@@ -138,13 +138,18 @@
   const goldIcon = L.divIcon({
     className: '',
     html: `<div style="
-      width:14px;height:14px;border-radius:50%;
-      background:#c9a84c;border:2px solid #e8c870;
-      box-shadow:0 0 8px rgba(201,168,76,0.7);">
+      width:36px;height:36px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;">
+      <div style="
+        width:16px;height:16px;border-radius:50%;
+        background:#c9a84c;border:2px solid #e8c870;
+        box-shadow:0 0 10px rgba(201,168,76,0.9);">
+      </div>
     </div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-    popupAnchor: [0, -10],
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -20],
   });
 
   async function geocode(location, country) {
