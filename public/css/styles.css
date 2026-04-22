@@ -301,7 +301,7 @@ nav {
 .train-banner-caption {
   position: absolute;
   top: 6%;
-  left: 50%;
+  left: calc(50% - 240px);
   padding: 0;
   background: none;
   text-align: left;
