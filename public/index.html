@@ -30,8 +30,26 @@
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-emblem">
-      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="40" cy="40" rx="13" ry="18" transform="rotate(-8 40 40)" stroke="white" stroke-width="3.2" fill="none"/>
+      <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="rg" x1="0.15" y1="0.05" x2="0.85" y2="0.95">
+            <stop offset="0%"   stop-color="white" stop-opacity="1"/>
+            <stop offset="40%"  stop-color="white" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="white" stop-opacity="0.35"/>
+          </linearGradient>
+          <mask id="band">
+            <ellipse cx="40" cy="40" rx="22" ry="28" transform="rotate(-10 40 40)" fill="white"/>
+            <ellipse cx="40" cy="40" rx="13" ry="19" transform="rotate(-10 40 40)" fill="black"/>
+          </mask>
+        </defs>
+        <!-- Filled ring band with dimensional gradient -->
+        <rect x="0" y="0" width="80" height="80" fill="url(#rg)" mask="url(#band)"/>
+        <!-- Crisp outer edge -->
+        <ellipse cx="40" cy="40" rx="22" ry="28" transform="rotate(-10 40 40)" stroke="white" stroke-width="0.6" fill="none" opacity="0.5"/>
+        <!-- Crisp inner edge (hole) -->
+        <ellipse cx="40" cy="40" rx="13" ry="19" transform="rotate(-10 40 40)" stroke="white" stroke-width="0.6" fill="none" opacity="0.3"/>
+        <!-- Top-left highlight -->
+        <ellipse cx="32" cy="24" rx="5" ry="2" transform="rotate(-10 32 24)" fill="white" opacity="0.35"/>
       </svg>
     </div>
     <h1>Fellow Travelers</h1>
