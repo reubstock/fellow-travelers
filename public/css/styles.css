@@ -117,13 +117,10 @@ nav {
   background: var(--bg);
 }
 
-.hero-map {
+#hero-map {
   position: absolute;
   inset: 0;
-  background-image: url('/images/hero-map.webp');
-  background-size: cover;
-  background-position: center;
-  opacity: 0.22;
+  z-index: 0;
 }
 
 .hero-overlay {
