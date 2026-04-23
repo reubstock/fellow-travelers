@@ -117,24 +117,24 @@ nav {
   background: var(--bg);
 }
 
-#hero-map {
+.hero-map {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
+  background-image: url('/images/hero-map.webp');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.22;
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  z-index: 2;
   background: radial-gradient(ellipse at center, transparent 30%, var(--bg) 100%);
 }
 
 .hero-content {
   position: relative;
-  z-index: 3;
+  z-index: 1;
   max-width: 780px;
   padding: 2rem;
 }
