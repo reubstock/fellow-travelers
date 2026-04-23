@@ -92,21 +92,26 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const heroMap = L.map('hero-map', {
-    zoomControl: false,
-    scrollWheelZoom: false,
-    dragging: false,
-    touchZoom: false,
-    doubleClickZoom: false,
-    keyboard: false,
-    attributionControl: false,
-  }).setView([35, -20], 2);
+  document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('hero-map');
+    container.style.height = window.innerHeight + 'px';
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 18,
-  }).addTo(heroMap);
+    const heroMap = L.map('hero-map', {
+      zoomControl: false,
+      scrollWheelZoom: false,
+      dragging: false,
+      touchZoom: false,
+      doubleClickZoom: false,
+      keyboard: false,
+      attributionControl: false,
+    }).setView([35, -20], 2);
 
-  window.addEventListener('load', () => heroMap.invalidateSize());
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+    }).addTo(heroMap);
+
+    setTimeout(() => heroMap.invalidateSize(), 100);
+  });
 </script>
 <script src="/js/nav.js"></script>
 <script>
