@@ -81,6 +81,7 @@
       padding: 2px 7px !important;
       white-space: nowrap !important;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+      cursor: pointer !important;
     }
     .map-label-group {
       border-color: #ccc !important;
@@ -250,10 +251,11 @@
         <p>📍 ${ev.location}, ${ev.country}<br>
         📅 ${dateStr}${ev.host_name ? '<br>👤 ' + ev.host_name : ''}
         ${ev.description ? '<br><em>' + ev.description + '</em>' : ''}</p>`;
-      L.marker([coords.lat, coords.lng], { icon: eventIcon })
-        .bindTooltip(ev.title, { permanent: true, className: 'map-label', direction: 'top', offset: [0, -8] })
+      const em = L.marker([coords.lat, coords.lng], { icon: eventIcon })
+        .bindTooltip(ev.title, { permanent: true, className: 'map-label', direction: 'top', offset: [0, -8], interactive: true })
         .bindPopup(popup)
         .addTo(markersLayer);
+      em.getTooltip().on('click', () => em.openPopup());
     }
 
     // Plot groups
@@ -264,10 +266,11 @@
       const popup = `<h4>${g.group_name}</h4>
         <p>📍 ${g.town}${g.founder_name ? '<br>👤 Founded by ' + g.founder_name : ''}
         ${g.description ? '<br><em>' + g.description + '</em>' : ''}</p>`;
-      L.marker([coords.lat, coords.lng], { icon: groupIcon })
-        .bindTooltip(g.group_name, { permanent: true, className: 'map-label map-label-group', direction: 'top', offset: [0, -8] })
+      const gm = L.marker([coords.lat, coords.lng], { icon: groupIcon })
+        .bindTooltip(g.group_name, { permanent: true, className: 'map-label map-label-group', direction: 'top', offset: [0, -8], interactive: true })
         .bindPopup(popup)
         .addTo(markersLayer);
+      gm.getTooltip().on('click', () => gm.openPopup());
     }
   }
 
