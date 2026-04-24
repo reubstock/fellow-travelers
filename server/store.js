@@ -74,7 +74,7 @@ const today = () => new Date().toISOString().split('T')[0];
 module.exports = {
   members: {
     all: () => {
-      const pinned = ['Reuben Steiger', 'Philip Rosedale'];
+      const pinned = ['Philip Rosedale', 'Reuben Steiger'];
       return [...members].sort((a, b) => {
         const ai = pinned.indexOf(a.name);
         const bi = pinned.indexOf(b.name);
