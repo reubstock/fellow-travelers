@@ -26,11 +26,12 @@
 </div>
 
 <section class="section">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+  <!-- Top action bar — always visible -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem;">
     <input
       type="text"
       id="member-search"
-      placeholder="Search by name, city, or country…"
+      placeholder="Search members by name, city, or country…"
       style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:0.6rem 1rem;color:var(--text);font-family:Georgia,serif;font-size:0.95rem;width:280px;"
       oninput="filterMembers()"
     />
@@ -40,6 +41,14 @@
     </div>
   </div>
 
+  <!-- Groups -->
+  <h2 style="font-family:Georgia,serif;color:var(--gold);font-size:1.1rem;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.6rem;">Groups</h2>
+  <div class="members-grid" id="groups-list">
+    <div class="loading">Loading groups…</div>
+  </div>
+
+  <!-- Member Directory -->
+  <h2 style="font-family:Georgia,serif;color:var(--gold);font-size:1.1rem;letter-spacing:0.08em;text-transform:uppercase;margin:3rem 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.6rem;">Member Directory</h2>
   <div class="members-grid" id="members-list">
     <div class="loading">Loading members…</div>
   </div>
@@ -125,6 +134,28 @@
 <script src="/js/nav.js"></script>
 <script>
   let allMembers = [];
+
+  async function loadGroups() {
+    const el = document.getElementById('groups-list');
+    try {
+      const res = await fetch('/api/groups');
+      const groups = await res.json();
+      if (groups.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🌐</div><p>No groups yet. Be the first to start one.</p></div>';
+        return;
+      }
+      el.innerHTML = groups.map(g => `
+        <div class="card member-card">
+          ${g.photo_url ? `<div class="member-avatar" style="overflow:hidden;"><img src="${g.photo_url}" alt="${g.group_name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" /></div>` : `<div class="member-avatar" style="font-size:1.4rem;">🌐</div>`}
+          <h3>${g.group_name}</h3>
+          <div class="member-location">📍 ${g.town}</div>
+          ${g.founder_name ? `<div class="member-location" style="margin-top:0.25rem;">👤 ${g.founder_name}</div>` : ''}
+          ${g.description ? `<p style="margin-top:0.5rem;">${g.description}</p>` : ''}
+        </div>`).join('');
+    } catch (e) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load groups.</p></div>';
+    }
+  }
 
   async function loadMembers() {
     try {
@@ -217,6 +248,7 @@
     if (res.ok) {
       document.getElementById('group-success').style.display = 'block';
       e.target.querySelector('[type=submit]').style.display = 'none';
+      loadGroups();
       loadMembers(); // refresh in case a new member was created
       setTimeout(closeGroupModal, 2000);
     } else {
@@ -245,6 +277,7 @@
     }
   });
 
+  loadGroups();
   loadMembers();
 </script>
 </body>
