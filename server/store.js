@@ -73,7 +73,19 @@ const today = () => new Date().toISOString().split('T')[0];
 
 module.exports = {
   members: {
-    all: () => [...members].sort((a, b) => a.joined_year - b.joined_year),
+    all: () => {
+      const pinned = ['Reuben Steiger', 'Philip Rosedale'];
+      return [...members].sort((a, b) => {
+        const ai = pinned.indexOf(a.name);
+        const bi = pinned.indexOf(b.name);
+        if (ai !== -1 || bi !== -1) {
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        }
+        return a.joined_year - b.joined_year;
+      });
+    },
     get: (id) => members.find(m => m.id === parseInt(id)) || null,
     insert({ name, location, country, bio, avatar_url, joined_year }) {
       const m = {
