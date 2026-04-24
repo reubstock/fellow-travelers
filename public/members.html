@@ -119,6 +119,7 @@
         </div>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;">Create Group</button>
+      <div id="group-error" style="display:none;margin-top:1rem;color:#e05555;font-family:Arial,sans-serif;font-size:0.85rem;"></div>
       <div id="group-success" style="display:none;margin-top:1rem;text-align:center;color:var(--gold);font-family:Georgia,serif;">
         ✦ Group created successfully!
       </div>
@@ -205,6 +206,11 @@
     document.getElementById('group-form').reset();
     document.getElementById('group-photo-preview').style.display = 'none';
     document.getElementById('group-success').style.display = 'none';
+    document.getElementById('group-error').style.display = 'none';
+    const btn = document.querySelector('#group-form [type=submit]');
+    btn.style.display = '';
+    btn.disabled = false;
+    btn.textContent = 'Create Group';
   }
 
   document.getElementById('group-modal').addEventListener('click', e => {
@@ -223,36 +229,68 @@
     reader.readAsDataURL(file);
   });
 
+  function compressImage(file, maxWidth = 600, quality = 0.7) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(1, maxWidth / img.width);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   document.getElementById('group-form').addEventListener('submit', async e => {
     e.preventDefault();
+    const submitBtn = e.target.querySelector('[type=submit]');
+    const errEl = document.getElementById('group-error');
+    errEl.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating…';
+
     const fd = new FormData(e.target);
     const data = Object.fromEntries(fd);
 
-    // Convert photo to base64 if provided
+    // Compress photo before sending
     const file = document.getElementById('group-photo-input').files[0];
     if (file) {
-      data.photo_url = await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = ev => resolve(ev.target.result);
-        reader.readAsDataURL(file);
-      });
+      data.photo_url = await compressImage(file);
     }
     delete data.photo;
 
-    const res = await fetch('/api/groups', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+    try {
+      const res = await fetch('/api/groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-    if (res.ok) {
-      document.getElementById('group-success').style.display = 'block';
-      e.target.querySelector('[type=submit]').style.display = 'none';
-      loadGroups();
-      loadMembers(); // refresh in case a new member was created
-      setTimeout(closeGroupModal, 2000);
-    } else {
-      alert('Failed to create group. Please fill in all required fields.');
+      if (res.ok) {
+        document.getElementById('group-success').style.display = 'block';
+        submitBtn.style.display = 'none';
+        loadGroups();
+        loadMembers();
+        setTimeout(closeGroupModal, 2000);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        errEl.textContent = '⚠ ' + (err.error || 'Failed to create group. Please check required fields.');
+        errEl.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Group';
+      }
+    } catch (ex) {
+      errEl.textContent = '⚠ Network error — is the server running?';
+      errEl.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Group';
     }
   });
 
