@@ -177,7 +177,7 @@
 
   // Initialise dark map
   function initMap() {
-    map = L.map('events-map', { zoomControl: false, scrollWheelZoom: false }).setView([40, -97], 3);
+    map = L.map('events-map', { zoomControl: false, scrollWheelZoom: false }).setView([39.5, -98.5], 4);
     L.control.zoom({ position: 'topright' }).addTo(map);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
