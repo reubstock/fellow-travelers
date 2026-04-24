@@ -35,7 +35,7 @@
       oninput="filterMembers()"
     />
     <div style="display:flex;gap:0.75rem;">
-      <button class="btn btn-sm btn-primary">START GROUP</button>
+      <button class="btn btn-sm btn-primary" onclick="openGroupModal()">START GROUP</button>
       <button class="btn btn-sm btn-outline" onclick="openModal()">+ Add Member</button>
     </div>
   </div>
@@ -74,6 +74,45 @@
         <textarea name="bio" placeholder="A line or two about this traveler…"></textarea>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;">Add Member</button>
+    </form>
+  </div>
+</div>
+
+<!-- Start Group Modal -->
+<div class="modal-backdrop" id="group-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeGroupModal()">&times;</button>
+    <h3>Start a Group</h3>
+    <form id="group-form">
+      <div class="form-group">
+        <label>Your Name *</label>
+        <input type="text" name="founder_name" placeholder="Must match your name in the directory, or a new record will be created" required />
+      </div>
+      <div class="form-group">
+        <label>Town *</label>
+        <input type="text" name="town" required />
+      </div>
+      <div class="form-group">
+        <label>Group Name *</label>
+        <input type="text" name="group_name" required />
+      </div>
+      <div class="form-group">
+        <label>Group Description</label>
+        <textarea name="description" placeholder="What's the spirit of your group?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Photo</label>
+        <input type="file" name="photo" accept="image/*" id="group-photo-input"
+          style="color:var(--text);font-family:Arial,sans-serif;font-size:0.9rem;" />
+        <div id="group-photo-preview" style="margin-top:0.75rem;display:none;">
+          <img id="group-photo-img" src="" alt="Preview"
+            style="max-width:100%;max-height:180px;border-radius:var(--radius);border:1px solid var(--border);" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Create Group</button>
+      <div id="group-success" style="display:none;margin-top:1rem;text-align:center;color:var(--gold);font-family:Georgia,serif;">
+        ✦ Group created successfully!
+      </div>
     </form>
   </div>
 </div>
@@ -128,6 +167,62 @@
 
   function openModal() { document.getElementById('member-modal').classList.add('open'); }
   function closeModal() { document.getElementById('member-modal').classList.remove('open'); }
+
+  function openGroupModal() { document.getElementById('group-modal').classList.add('open'); }
+  function closeGroupModal() {
+    document.getElementById('group-modal').classList.remove('open');
+    document.getElementById('group-form').reset();
+    document.getElementById('group-photo-preview').style.display = 'none';
+    document.getElementById('group-success').style.display = 'none';
+  }
+
+  document.getElementById('group-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeGroupModal();
+  });
+
+  // Photo preview
+  document.getElementById('group-photo-input').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('group-photo-img').src = e.target.result;
+      document.getElementById('group-photo-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('group-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd);
+
+    // Convert photo to base64 if provided
+    const file = document.getElementById('group-photo-input').files[0];
+    if (file) {
+      data.photo_url = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => resolve(ev.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+    delete data.photo;
+
+    const res = await fetch('/api/groups', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
+      document.getElementById('group-success').style.display = 'block';
+      e.target.querySelector('[type=submit]').style.display = 'none';
+      loadMembers(); // refresh in case a new member was created
+      setTimeout(closeGroupModal, 2000);
+    } else {
+      alert('Failed to create group. Please fill in all required fields.');
+    }
+  });
 
   document.getElementById('member-modal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeModal();

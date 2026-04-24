@@ -1,5 +1,8 @@
 let nextMemberId = 10;
 let nextEventId = 6;
+let nextGroupId = 1;
+
+const groups = [];
 
 const members = [
   { id: 1, name: 'James Whitmore',  location: 'London',       country: 'United Kingdom', bio: 'Avid sailor and whisky connoisseur. Has visited 72 countries.',         avatar_url: null, joined_year: 2026 },
@@ -33,6 +36,24 @@ module.exports = {
         joined_year: joined_year ? parseInt(joined_year) : null };
       members.push(m);
       return m;
+    },
+  },
+  groups: {
+    all: () => [...groups],
+    get: (id) => groups.find(g => g.id === parseInt(id)) || null,
+    insert({ group_name, description, town, photo_url, founder_id, founder_name }) {
+      const g = {
+        id: nextGroupId++,
+        group_name,
+        description: description || null,
+        town: town || null,
+        photo_url: photo_url || null,
+        founder_id: founder_id || null,
+        founder_name: founder_name || null,
+        created_at: new Date().toISOString(),
+      };
+      groups.push(g);
+      return g;
     },
   },
   events: {

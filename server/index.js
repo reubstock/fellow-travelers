@@ -16,6 +16,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api/members', require('./routes/members'));
 app.use('/api/events', require('./routes/events'));
+app.use('/api/groups', require('./routes/groups'));
 
 // SPA fallback — serve index.html for all non-API routes
 app.get('*', (req, res) => {
