@@ -51,9 +51,9 @@
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: #c9a84c;
-      border: 1.5px solid #e8c870;
-      box-shadow: 0 0 6px rgba(201,168,76,0.8);
+      background: #f5d020;
+      border: 1.5px solid #ffe566;
+      box-shadow: 0 0 6px rgba(245,208,32,0.8);
       flex-shrink: 0;
     }
     /* Dark Leaflet popup to match theme */
@@ -83,8 +83,8 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
     }
     .map-label-group {
-      border-color: #7eb8d4 !important;
-      color: #a8d8f0 !important;
+      border-color: #3ab86a !important;
+      color: #62e892 !important;
     }
     .leaflet-tooltip::before { display: none !important; }
     .map-section-header {
@@ -124,7 +124,7 @@
       <span>Upcoming event</span>
     </div>
     <div class="legend-item" style="margin-top:0.4rem;">
-      <div class="legend-dot" style="background:#7eb8d4;border-color:#a8d8f0;box-shadow:0 0 6px rgba(126,184,212,0.8);"></div>
+      <div class="legend-dot" style="background:#3ab86a;border-color:#62e892;box-shadow:0 0 6px rgba(58,184,106,0.8);"></div>
       <span>Group</span>
     </div>
   </div>
@@ -219,8 +219,8 @@
       popupAnchor: [0, -16],
     });
   }
-  const eventIcon = makeIcon('#c9a84c', '#e8c870');
-  const groupIcon = makeIcon('#7eb8d4', '#a8d8f0');
+  const eventIcon = makeIcon('#f5d020', '#ffe566');
+  const groupIcon = makeIcon('#3ab86a', '#62e892');
 
   async function geocode(query) {
     const q = encodeURIComponent(query);
