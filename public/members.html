@@ -34,7 +34,10 @@
       style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:0.6rem 1rem;color:var(--text);font-family:Georgia,serif;font-size:0.95rem;width:280px;"
       oninput="filterMembers()"
     />
-    <button class="btn btn-sm btn-outline" onclick="openModal()">+ Add Member</button>
+    <div style="display:flex;gap:0.75rem;">
+      <button class="btn btn-sm btn-primary">START GROUP</button>
+      <button class="btn btn-sm btn-outline" onclick="openModal()">+ Add Member</button>
+    </div>
   </div>
 
   <div class="members-grid" id="members-list">
