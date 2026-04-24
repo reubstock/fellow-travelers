@@ -7,14 +7,54 @@
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
+    #map-wrapper {
+      position: relative;
+      margin: 0 auto 4rem;
+      max-width: 1156px;
+      padding: 0 2rem;
+    }
     #events-map {
-      height: 460px;
+      height: calc(100vh - 180px);
+      min-height: 420px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      margin: 0 2rem 4rem;
-      max-width: 1156px;
-      margin-left: auto;
-      margin-right: auto;
+      width: 100%;
+    }
+    #map-legend {
+      position: absolute;
+      top: 1rem;
+      left: 2.75rem;
+      background: rgba(13, 17, 23, 0.88);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 0.6rem 1rem 0.75rem;
+      z-index: 800;
+      pointer-events: none;
+    }
+    #map-legend h4 {
+      color: var(--gold);
+      font-family: Georgia, serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    #map-legend .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #d0d0d0;
+      font-family: Arial, sans-serif;
+      font-size: 0.78rem;
+    }
+    #map-legend .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #c9a84c;
+      border: 1.5px solid #e8c870;
+      box-shadow: 0 0 6px rgba(201,168,76,0.8);
+      flex-shrink: 0;
     }
     /* Dark Leaflet popup to match theme */
     .leaflet-popup-content-wrapper {
@@ -56,7 +96,16 @@
 </div>
 
 <!-- Map -->
-<div id="events-map"></div>
+<div id="map-wrapper">
+  <div id="events-map"></div>
+  <div id="map-legend">
+    <h4>Groups</h4>
+    <div class="legend-item">
+      <div class="legend-dot"></div>
+      <span>Dinner gathering</span>
+    </div>
+  </div>
+</div>
 
 <section class="section">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
