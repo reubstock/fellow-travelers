@@ -67,7 +67,26 @@
     .leaflet-popup-tip { background: var(--surface); }
     .leaflet-popup-content { margin: 1rem 1.1rem; font-family: Georgia, serif; }
     .leaflet-popup-content h4 { color: var(--gold); margin-bottom: 0.3rem; font-size: 0.95rem; }
-    .leaflet-popup-content p { color: var(--muted); font-size: 0.82rem; margin: 0; font-family: Arial, sans-serif; }
+    .leaflet-popup-content p { color: var(--muted); font-size: 0.82rem; margin: 0.2rem 0 0; font-family: Arial, sans-serif; line-height: 1.5; }
+    /* Permanent map labels */
+    .map-label {
+      background: rgba(13,17,23,0.82) !important;
+      border: 1px solid #c9a84c !important;
+      border-radius: 4px !important;
+      color: #e8c870 !important;
+      font-family: Arial, sans-serif !important;
+      font-size: 0.7rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.05em !important;
+      padding: 2px 7px !important;
+      white-space: nowrap !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
+    }
+    .map-label-group {
+      border-color: #7eb8d4 !important;
+      color: #a8d8f0 !important;
+    }
+    .leaflet-tooltip::before { display: none !important; }
     .map-section-header {
       text-align: center;
       padding: 0 2rem 2rem;
@@ -102,7 +121,11 @@
     <h4>Groups</h4>
     <div class="legend-item">
       <div class="legend-dot"></div>
-      <span>Dinner gathering</span>
+      <span>Upcoming event</span>
+    </div>
+    <div class="legend-item" style="margin-top:0.4rem;">
+      <div class="legend-dot" style="background:#7eb8d4;border-color:#a8d8f0;box-shadow:0 0 6px rgba(126,184,212,0.8);"></div>
+      <span>Group</span>
     </div>
   </div>
 </div>
@@ -175,7 +198,6 @@
   let currentFilter = 'upcoming';
   let map, markersLayer;
 
-  // Initialise dark map
   function initMap() {
     map = L.map('events-map', { zoomControl: false, scrollWheelZoom: false }).setView([39.5, -98.5], 4);
     L.control.zoom({ position: 'topright' }).addTo(map);
@@ -186,25 +208,22 @@
     markersLayer = L.layerGroup().addTo(map);
   }
 
-  const goldIcon = L.divIcon({
-    className: '',
-    html: `<div style="
-      width:36px;height:36px;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;">
-      <div style="
-        width:16px;height:16px;border-radius:50%;
-        background:#c9a84c;border:2px solid #e8c870;
-        box-shadow:0 0 10px rgba(201,168,76,0.9);">
-      </div>
-    </div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -20],
-  });
+  function makeIcon(color, glow) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+        <div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid ${glow};box-shadow:0 0 8px ${glow};"></div>
+      </div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+      popupAnchor: [0, -16],
+    });
+  }
+  const eventIcon = makeIcon('#c9a84c', '#e8c870');
+  const groupIcon = makeIcon('#7eb8d4', '#a8d8f0');
 
-  async function geocode(location, country) {
-    const q = encodeURIComponent(`${location}, ${country}`);
+  async function geocode(query) {
+    const q = encodeURIComponent(query);
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
@@ -216,17 +235,38 @@
     return null;
   }
 
-  async function plotEvents(events) {
+  async function plotMarkers(events, groups) {
     markersLayer.clearLayers();
-    for (let i = 0; i < events.length; i++) {
-      const ev = events[i];
-      if (i > 0) await new Promise(r => setTimeout(r, 1100)); // respect Nominatim rate limit
-      const coords = await geocode(ev.location, ev.country);
+    let requestCount = 0;
+
+    // Plot upcoming events
+    for (const ev of events) {
+      if (requestCount++ > 0) await new Promise(r => setTimeout(r, 1100));
+      const coords = await geocode(`${ev.location}, ${ev.country}`);
       if (!coords) continue;
       const d = new Date(ev.date + 'T00:00:00');
       const dateStr = d.toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' });
-      L.marker([coords.lat, coords.lng], { icon: goldIcon })
-        .bindPopup(`<h4>${ev.title}</h4><p>📍 ${ev.location}, ${ev.country}</p><p>📅 ${dateStr}${ev.host_name ? '<br>👤 ' + ev.host_name : ''}</p>`)
+      const popup = `<h4>${ev.title}</h4>
+        <p>📍 ${ev.location}, ${ev.country}<br>
+        📅 ${dateStr}${ev.host_name ? '<br>👤 ' + ev.host_name : ''}
+        ${ev.description ? '<br><em>' + ev.description + '</em>' : ''}</p>`;
+      L.marker([coords.lat, coords.lng], { icon: eventIcon })
+        .bindTooltip(ev.title, { permanent: true, className: 'map-label', direction: 'top', offset: [0, -8] })
+        .bindPopup(popup)
+        .addTo(markersLayer);
+    }
+
+    // Plot groups
+    for (const g of groups) {
+      if (requestCount++ > 0) await new Promise(r => setTimeout(r, 1100));
+      const coords = await geocode(g.town);
+      if (!coords) continue;
+      const popup = `<h4>${g.group_name}</h4>
+        <p>📍 ${g.town}${g.founder_name ? '<br>👤 Founded by ' + g.founder_name : ''}
+        ${g.description ? '<br><em>' + g.description + '</em>' : ''}</p>`;
+      L.marker([coords.lat, coords.lng], { icon: groupIcon })
+        .bindTooltip(g.group_name, { permanent: true, className: 'map-label map-label-group', direction: 'top', offset: [0, -8] })
+        .bindPopup(popup)
         .addTo(markersLayer);
     }
   }
@@ -235,12 +275,13 @@
     const el = document.getElementById('events-list');
     el.innerHTML = '<div class="loading">Loading…</div>';
     const url = currentFilter === 'upcoming' ? '/api/events?upcoming=true' : '/api/events';
-    const res = await fetch(url);
-    const events = await res.json();
+    const [evRes, grpRes] = await Promise.all([fetch(url), fetch('/api/groups')]);
+    const events = await evRes.json();
+    const groups = await grpRes.json();
 
     if (events.length === 0) {
       el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No events found.</p></div>';
-      markersLayer.clearLayers();
+      plotMarkers([], groups);
       return;
     }
 
@@ -266,7 +307,7 @@
         </div>`;
     }).join('');
 
-    plotEvents(events);
+    plotMarkers(events, groups);
   }
 
   function setFilter(f) {
