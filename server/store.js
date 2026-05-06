@@ -28,6 +28,8 @@ const SEED_EVENTS = [
 
 const SEED_GROUPS = [];
 
+const SEED_DEEDS = [];
+
 // ── File helpers ─────────────────────────────────────────────────────────────
 
 function filePath(name) {
@@ -61,11 +63,13 @@ function persist(name, data) {
 const members = loadCollection('members', SEED_MEMBERS);
 const events  = loadCollection('events',  SEED_EVENTS);
 const groups  = loadCollection('groups',  SEED_GROUPS);
+const deeds   = loadCollection('deeds',   SEED_DEEDS);
 
 // Derive next IDs from loaded data
 let nextMemberId = members.reduce((max, m) => Math.max(max, m.id), 0) + 1;
 let nextEventId  = events.reduce((max, e) => Math.max(max, e.id),  0) + 1;
 let nextGroupId  = groups.reduce((max, g) => Math.max(max, g.id),  0) + 1;
+let nextDeedId   = deeds.reduce((max, d)  => Math.max(max, d.id),  0) + 1;
 
 const today = () => new Date().toISOString().split('T')[0];
 
@@ -130,6 +134,23 @@ module.exports = {
       events.push(e);
       persist('events', events);
       return e;
+    },
+  },
+
+  deeds: {
+    all: () => [...deeds],
+    get: (id) => deeds.find(d => d.id === parseInt(id)) || null,
+    insert({ title, description, location, country, author }) {
+      const d = {
+        id: nextDeedId++, title,
+        description: description || null,
+        location, country,
+        author: author || null,
+        created_at: new Date().toISOString(),
+      };
+      deeds.push(d);
+      persist('deeds', deeds);
+      return d;
     },
   },
 };

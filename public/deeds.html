@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deeds — Fellow Travelers</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    #map-wrapper {
+      position: relative;
+      margin: 0 auto 4rem;
+      max-width: 1156px;
+      padding: 0 2rem;
+    }
+    #deeds-map {
+      height: calc(100vh - 180px);
+      min-height: 420px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      width: 100%;
+    }
+    /* Dark Leaflet popup to match theme */
+    .leaflet-popup-content-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      color: var(--text);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .leaflet-popup-tip { background: var(--surface); }
+    .leaflet-popup-content { margin: 1rem 1.1rem; font-family: Georgia, serif; }
+    .leaflet-popup-content h4 { color: var(--gold); margin-bottom: 0.3rem; font-size: 0.95rem; }
+    .leaflet-popup-content p { color: var(--muted); font-size: 0.82rem; margin: 0.2rem 0 0; font-family: Arial, sans-serif; line-height: 1.5; }
+    .map-label {
+      background: #ffffff !important;
+      border: 1px solid #ccc !important;
+      border-radius: 4px !important;
+      color: #111111 !important;
+      font-family: Arial, sans-serif !important;
+      font-size: 0.7rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.03em !important;
+      padding: 2px 7px !important;
+      white-space: nowrap !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+      cursor: pointer !important;
+    }
+    .leaflet-tooltip::before { display: none !important; }
+    .deeds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .deed-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .deed-card h3 { color: var(--gold); margin-bottom: 0.5rem; font-size: 1rem; }
+    .deed-card .deed-meta { color: var(--muted); font-size: 0.8rem; font-family: Arial, sans-serif; margin-bottom: 0.75rem; }
+    .deed-card p { color: var(--text); font-size: 0.88rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">FT</a>
+  <ul class="nav-links">
+    <li><a href="/events.html">Find Others</a></li>
+    <li><a href="/members.html">Start a Group</a></li>
+    <li><a href="/deeds.html" class="active">Deeds</a></li>
+    <li><a href="/manifesto.html">Manifesto</a></li>
+    <li><a href="/about.html">About</a></li>
+  </ul>
+  <a href="/deck.html" class="nav-deck">Deck</a>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="page-header">
+  <h1>DEEDS</h1>
+  <p>What fellows do in the world.</p>
+</div>
+
+<!-- Map -->
+<div id="map-wrapper">
+  <div id="deeds-map"></div>
+</div>
+
+<section class="section">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+    <h2 style="color:var(--gold);font-size:1.1rem;letter-spacing:0.05em;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:0.5rem;width:100%;">What We've Done</h2>
+    <button class="btn btn-sm btn-outline" onclick="openModal()">+ Add a Deed</button>
+  </div>
+
+  <div class="deeds-grid" id="deeds-list">
+    <div class="loading">Loading deeds…</div>
+  </div>
+</section>
+
+<!-- Add Deed Modal -->
+<div class="modal-backdrop" id="deed-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>Add a Deed</h3>
+    <form id="deed-form">
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" required />
+      </div>
+      <div class="form-group">
+        <label>Who did it</label>
+        <input type="text" name="author" placeholder="Your name or group name" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Location *</label>
+          <input type="text" name="location" required />
+        </div>
+        <div class="form-group">
+          <label>Country *</label>
+          <input type="text" name="country" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Add Deed</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">✦ Fellow Travelers</div>
+  <p>Gathering since 2025 &middot; Wherever you roam, you are not alone.</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/nav.js"></script>
+<script>
+  let map, markersLayer;
+
+  function initMap() {
+    map = L.map('deeds-map', { zoomControl: false, scrollWheelZoom: false }).setView([20, 10], 2);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri',
+      maxZoom: 18,
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+
+  function makeIcon() {
+    return L.divIcon({
+      className: '',
+      html: `<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+        <div style="width:14px;height:14px;border-radius:50%;background:#c9a84c;border:2px solid #e8c870;box-shadow:0 0 8px rgba(201,168,76,0.8);"></div>
+      </div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+      popupAnchor: [0, -16],
+    });
+  }
+
+  async function geocode(query) {
+    const q = encodeURIComponent(query);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      const data = await res.json();
+      if (data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    } catch (e) {}
+    return null;
+  }
+
+  async function plotDeeds(deeds) {
+    markersLayer.clearLayers();
+    let count = 0;
+    for (const d of deeds) {
+      if (count++ > 0) await new Promise(r => setTimeout(r, 1100));
+      const coords = await geocode(`${d.location}, ${d.country}`);
+      if (!coords) continue;
+      const popup = `<h4>${d.title}</h4>
+        <p>📍 ${d.location}, ${d.country}
+        ${d.author ? '<br>👤 ' + d.author : ''}
+        ${d.description ? '<br><em>' + d.description + '</em>' : ''}</p>`;
+      const m = L.marker([coords.lat, coords.lng], { icon: makeIcon() })
+        .bindTooltip(d.title, { permanent: true, className: 'map-label', direction: 'top', offset: [0, -8], interactive: true })
+        .bindPopup(popup)
+        .addTo(markersLayer);
+      m.getTooltip().on('click', () => m.openPopup());
+    }
+  }
+
+  async function loadDeeds() {
+    const el = document.getElementById('deeds-list');
+    el.innerHTML = '<div class="loading">Loading…</div>';
+    try {
+      const res = await fetch('/api/deeds');
+      const deeds = await res.json();
+      if (deeds.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🌍</div><p>No deeds recorded yet. Be the first.</p></div>';
+        plotDeeds([]);
+        return;
+      }
+      el.innerHTML = deeds.map(d => `
+        <div class="deed-card">
+          <h3>${d.title}</h3>
+          <div class="deed-meta">📍 ${d.location}, ${d.country}${d.author ? ' &middot; 👤 ' + d.author : ''}</div>
+          ${d.description ? `<p>${d.description}</p>` : ''}
+        </div>`).join('');
+      plotDeeds(deeds);
+    } catch (e) {
+      el.innerHTML = '<div class="empty-state"><p>Could not load deeds.</p></div>';
+    }
+  }
+
+  function openModal() { document.getElementById('deed-modal').classList.add('open'); }
+  function closeModal() { document.getElementById('deed-modal').classList.remove('open'); }
+
+  document.getElementById('deed-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  document.getElementById('deed-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const res = await fetch('/api/deeds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      closeModal();
+      e.target.reset();
+      loadDeeds();
+    } else {
+      alert('Failed to add deed. Please check required fields.');
+    }
+  });
+
+  initMap();
+  loadDeeds();
+</script>
+</body>
+</html>
