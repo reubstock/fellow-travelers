@@ -5,19 +5,228 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deck — Fellow Travelers</title>
   <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    .deck-label {
-      background: rgba(201,168,76,0.08);
-      border-bottom: 1px solid var(--border);
-      text-align: center;
-      padding: 0.5rem 2rem;
-      font-family: Arial, sans-serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
+    /* ── Map hero layout ──────────────────────────────────────── */
+    .map-hero {
+      position: relative;
+      height: calc(100vh - 64px);
+      min-height: 520px;
+      background: var(--bg);
+      overflow: hidden;
     }
-    .deck-label span { color: var(--gold); }
+    #hero-map {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    /* ── Sidebars ─────────────────────────────────────────────── */
+    #sidebar-left {
+      position: absolute;
+      left: 0; top: 45px; bottom: 1rem;
+      width: 270px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0.85rem;
+      pointer-events: none;
+    }
+    #sidebar-left > * { pointer-events: auto; }
+
+    #sidebar-right {
+      position: absolute;
+      right: 0; top: 80px; bottom: 0;
+      width: 270px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 0.85rem;
+      pointer-events: none;
+    }
+    #sidebar-right > * { pointer-events: auto; }
+
+    .hero-sidebar-card {
+      background: rgba(13, 17, 23, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 10px;
+      padding: 0.95rem 1rem;
+      border: 1px solid rgba(201, 168, 76, 0.18);
+      color: #fff;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .hero-sidebar-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.8rem;
+      font-weight: 700;
+      font-family: Arial, sans-serif;
+      flex-shrink: 0;
+    }
+    .hero-sidebar-scroll {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+    .hero-sidebar-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.12s;
+    }
+    .hero-sidebar-item:last-child { border-bottom: none; }
+    .hero-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+    .hero-sidebar-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 0.35rem;
+    }
+    .hero-sidebar-body .title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.92);
+      line-height: 1.35;
+      font-family: Georgia, serif;
+    }
+    .hero-sidebar-body .sub {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.45);
+      margin-top: 0.1rem;
+      font-family: Arial, sans-serif;
+    }
+
+    /* ── Group photo in right sidebar ─────────────────────────── */
+    .group-thumb {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1.5px solid #3ab86a;
+    }
+    .group-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .group-thumb-placeholder {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: rgba(58,184,106,0.2);
+      border: 1.5px solid #3ab86a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+
+    /* ── Pulsing map markers ──────────────────────────────────── */
+    @keyframes pulse-ring {
+      0%   { transform: scale(1);   opacity: 0.85; }
+      70%  { transform: scale(2.6); opacity: 0; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+    .ft-marker { display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
+    .ft-marker .dot-wrap { position: relative; width: 22px; height: 22px; }
+    .ft-marker .ring {
+      position: absolute; inset: 3px; border-radius: 50%;
+      animation: pulse-ring 2s ease-out infinite;
+      pointer-events: none;
+    }
+    .ft-marker .dot {
+      position: absolute; inset: 3px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.9);
+    }
+    .ft-event-marker .ring { background: rgba(245,208,32,0.5); }
+    .ft-event-marker .dot  { background: #f5d020; box-shadow: 0 0 10px rgba(245,208,32,0.95); }
+    .ft-group-marker .ring { background: rgba(58,184,106,0.45); }
+    .ft-group-marker .dot  { background: #3ab86a; box-shadow: 0 0 10px rgba(58,184,106,0.9); }
+
+    /* ── Leaflet popup dark theme ─────────────────────────────── */
+    .ft-popup .leaflet-popup-content-wrapper {
+      background: rgba(13,17,23,0.95);
+      color: #fff;
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 10px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    .ft-popup .leaflet-popup-content { margin: 0; padding: 0.8rem 1rem; }
+    .ft-popup .leaflet-popup-tip { background: rgba(13,17,23,0.95); }
+    .ft-popup h4 { color: var(--gold) !important; margin: 0 0 0.3rem; font-size: 0.95rem; font-family: Georgia, serif; }
+    .ft-popup p  { color: rgba(255,255,255,0.75) !important; margin: 0 0 0.2rem; font-size: 0.78rem; line-height: 1.4; font-family: Arial, sans-serif; }
+    .leaflet-pane        { z-index: 400 !important; }
+    .leaflet-top,
+    .leaflet-bottom      { z-index: 500 !important; }
+
+    /* ── Launch notecards ─────────────────────────────────────── */
+    .launch-cards {
+      position: absolute;
+      inset: 0;
+      z-index: 110;
+      pointer-events: none;
+    }
+    .launch-cards.visible { pointer-events: none; }
+    .launch-card {
+      position: absolute;
+      width: 190px;
+      background: rgba(13,17,23,0.91);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 10px;
+      overflow: visible;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.45s ease, transform 0.42s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease;
+      pointer-events: none;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+    .launch-cards.visible .launch-card { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .launch-cards.visible .launch-card:hover:not(.bg-dismissed):not(.dragging) {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.62);
+    }
+    .launch-card.dragging { cursor: grabbing !important; z-index: 5; transition: none !important; }
+    .launch-card.bg-dismissed { opacity: 0 !important; transform: translateY(8px) scale(0.93) !important; pointer-events: none !important; transition: opacity 0.28s ease, transform 0.28s ease !important; }
+    .launch-card.dismissed   { opacity: 0 !important; transform: translateY(8px) scale(0.93) !important; pointer-events: none !important; }
+
+    .lcard-photo { height: 76px; overflow: hidden; border-radius: 10px 10px 0 0; }
+    .lcard-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lcard-body { padding: 0.7rem 0.75rem 0.8rem; }
+    .lcard-close {
+      position: absolute; top: 0.35rem; right: 0.45rem;
+      background: rgba(0,0,0,0.45); border: none; border-radius: 50%;
+      color: rgba(255,255,255,0.7); font-size: 0.85rem;
+      width: 20px; height: 20px; line-height: 20px; text-align: center;
+      cursor: pointer; padding: 0; z-index: 2;
+    }
+    .lcard-close:hover { color:#fff; background:rgba(0,0,0,0.7); }
+    .lcard-label { font-size:0.58rem; letter-spacing:0.14em; font-weight:800; text-transform:uppercase; margin-bottom:0.25rem; font-family:Arial,sans-serif; }
+    .lcard-title { font-size:0.82rem; font-weight:700; color:#fff; line-height:1.3; margin-bottom:0.2rem; font-family:Georgia,serif; }
+    .lcard-meta  { font-size:0.67rem; color:rgba(255,255,255,0.45); margin-bottom:0.55rem; font-family:Arial,sans-serif; }
+    .lcard-link  {
+      display:inline-block; font-size:0.68rem; font-weight:700;
+      text-decoration:none; padding:0.25rem 0.6rem;
+      border-radius:4px; border:1px solid; transition:background 0.2s;
+    }
+    .lcard-link:hover { opacity:0.85; text-decoration:none; }
+
+    /* ── Mobile: hide sidebars ────────────────────────────────── */
+    @media (max-width: 768px) {
+      #sidebar-left, #sidebar-right { display: none; }
+      .map-hero { height: 60vh; min-height: 360px; }
+    }
   </style>
 </head>
 <body>
@@ -35,130 +244,406 @@
   <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
 </nav>
 
-<div class="deck-label">Reference — <span>Original Site (v1)</span></div>
+<!-- ── Map hero ──────────────────────────────────────────────── -->
+<section class="map-hero">
+  <div id="hero-map"></div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-map"></div>
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <div class="hero-emblem">✦</div>
-    <h1>Fellow Travelers</h1>
-    <p class="tagline">An inspiring and expansive movement.</p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-      <a href="/events.html" class="btn btn-primary">View Gatherings</a>
+  <!-- Left sidebar: Upcoming Dinners -->
+  <div id="sidebar-left">
+    <div class="hero-sidebar-card">
+      <div class="hero-sidebar-label">Upcoming Dinners</div>
+      <div class="hero-sidebar-scroll" id="sidebar-events">
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating notecards -->
+  <div id="launch-cards" class="launch-cards"></div>
+
+  <!-- Right sidebar: Active Groups -->
+  <div id="sidebar-right">
+    <div class="hero-sidebar-card">
+      <div class="hero-sidebar-label">Active Groups</div>
+      <div class="hero-sidebar-scroll" id="sidebar-groups">
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);">Loading…</div>
+      </div>
     </div>
   </div>
 </section>
-
-<!-- TRAIN IMAGE BANNER -->
-<div class="train-banner">
-  <img src="/images/fellow-travellers.png" alt="Fellow Travelers — men pulling each other aboard a moving train" />
-  <div class="train-banner-caption">
-    <span>No man left behind. No journey taken alone.</span>
-  </div>
-</div>
-
-<!-- UPCOMING EVENTS PREVIEW -->
-<section class="section">
-  <div class="section-header">
-    <p class="section-label">On The Horizon</p>
-    <h2 class="section-title">Upcoming <span>Gatherings</span></h2>
-    <div class="section-rule"></div>
-  </div>
-  <div class="events-grid" id="home-events">
-    <div class="loading">Loading events…</div>
-  </div>
-  <div style="text-align:center;margin-top:2.5rem;">
-    <a href="/events.html" class="btn btn-outline">See All Events</a>
-  </div>
-</section>
-
-<!-- MEMBERS PREVIEW -->
-<section class="section" style="padding-top:0;">
-  <div class="section-header">
-    <p class="section-label">Our Brotherhood</p>
-    <h2 class="section-title">Meet the <span>Travelers</span></h2>
-    <div class="section-rule"></div>
-  </div>
-  <div class="members-grid" id="home-members">
-    <div class="loading">Loading members…</div>
-  </div>
-  <div style="text-align:center;margin-top:2.5rem;">
-    <a href="/members.html" class="btn btn-outline">Full Directory</a>
-  </div>
-</section>
-
-<!-- CTA -->
-<div class="cta-section">
-  <h2>Ready to Join the Journey?</h2>
-  <p>Fellowship is earned through curiosity, respect, and a willingness to show up — wherever in the world that may be.</p>
-  <a href="/about.html#join" class="btn btn-primary">Apply for Membership</a>
-</div>
 
 <footer>
   <div class="footer-brand">✦ Fellow Travelers</div>
   <p>Gathering since 2025 &middot; Wherever you roam, you are not alone.</p>
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/nav.js"></script>
 <script>
-  async function loadHomeData() {
-    try {
-      const [membersRes, eventsRes] = await Promise.all([
-        fetch('/api/members'),
-        fetch('/api/events?upcoming=true'),
-      ]);
-      const members = await membersRes.json();
-      const events = await eventsRes.json();
+  // ── Map init ──────────────────────────────────────────────────
+  const DEFAULT_VIEW = [39.5, -98.5];
+  const DEFAULT_ZOOM = 4;
 
-      const eventsEl = document.getElementById('home-events');
-      if (events.length === 0) {
-        eventsEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No upcoming events.</p></div>';
-      } else {
-        eventsEl.innerHTML = events.slice(0, 3).map(renderEventCard).join('');
+  const heroMap = L.map('hero-map', {
+    zoomControl: false,
+    scrollWheelZoom: false,
+    dragging: true,
+    touchZoom: true,
+    doubleClickZoom: true,
+    attributionControl: false,
+    zoomSnap: 0.25,
+  });
+  heroMap.setView(DEFAULT_VIEW, DEFAULT_ZOOM);
+  L.control.zoom({ position: 'topright' }).addTo(heroMap);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 18,
+  }).addTo(heroMap);
+
+  // ── Marker factory ────────────────────────────────────────────
+  function makeMarkerIcon(cls) {
+    return L.divIcon({
+      className: '',
+      html: `<div class="ft-marker ${cls}"><div class="dot-wrap"><div class="ring"></div><div class="dot"></div></div></div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+      popupAnchor: [0, -13],
+    });
+  }
+
+  // ── Geocode cache ─────────────────────────────────────────────
+  const geocodeCache = {};
+  let geocodeQueue = Promise.resolve();
+
+  function geocode(query) {
+    if (geocodeCache[query]) return Promise.resolve(geocodeCache[query]);
+    geocodeQueue = geocodeQueue.then(() => new Promise(resolve => {
+      setTimeout(async () => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const data = await res.json();
+          const coords = data.length ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
+          geocodeCache[query] = coords;
+          resolve(coords);
+        } catch { resolve(null); }
+      }, geocodeQueue === Promise.resolve() ? 0 : 1100);
+    }));
+    return geocodeQueue;
+  }
+
+  // ── Notecard system ───────────────────────────────────────────
+  window._markerRefs  = {};
+  window._pointerSlots = [];
+
+  function dismissCard(id) {
+    const card = document.getElementById(id);
+    if (!card) return;
+    card.classList.add('dismissed');
+    setTimeout(() => {
+      card.remove();
+      window._pointerSlots = (window._pointerSlots || []).filter(s => s.id !== id);
+      updatePointers();
+    }, 380);
+  }
+
+  document.addEventListener('pointerdown', function(e) {
+    if (e.button !== 0 && e.button !== undefined) return;
+    const card = e.target.closest && e.target.closest('.launch-card');
+    if (!card) return;
+    if (e.target.closest('.lcard-close, a')) return;
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.clientX, startY = e.clientY;
+    const startL = parseFloat(card.style.left) || 0;
+    const startT = parseFloat(card.style.top)  || 0;
+    let moved = false;
+    card.classList.add('dragging');
+    function onMove(ev) {
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      if (!moved && Math.hypot(dx, dy) < 4) return;
+      moved = true;
+      card.style.left = (startL + dx) + 'px';
+      card.style.top  = (startT + dy) + 'px';
+      updatePointers();
+    }
+    function onUp() {
+      document.removeEventListener('pointermove', onMove, { capture: true });
+      document.removeEventListener('pointerup',   onUp,   { capture: true });
+      card.classList.remove('dragging');
+    }
+    document.addEventListener('pointermove', onMove, { capture: true });
+    document.addEventListener('pointerup',   onUp,   { capture: true });
+  }, { capture: true });
+
+  heroMap.on('move', updatePointers);
+
+  function nearestBorderPoint(dotX, dotY, cx, cy, cw, ch, R) {
+    R = R || 0;
+    const clampX = Math.max(cx, Math.min(cx + cw, dotX));
+    const clampY = Math.max(cy, Math.min(cy + ch, dotY));
+    let bx, by;
+    if      (dotX < cx)       { bx = cx;      by = clampY; }
+    else if (dotX > cx + cw)  { bx = cx + cw; by = clampY; }
+    else if (dotY < cy)       { bx = clampX;  by = cy; }
+    else if (dotY > cy + ch)  { bx = clampX;  by = cy + ch; }
+    else {
+      const d = [dotX-cx, cx+cw-dotX, dotY-cy, cy+ch-dotY];
+      const m = Math.min(...d);
+      if      (m === d[0]) { bx = cx;      by = dotY; }
+      else if (m === d[1]) { bx = cx + cw; by = dotY; }
+      else if (m === d[2]) { bx = dotX;    by = cy; }
+      else                 { bx = dotX;    by = cy + ch; }
+    }
+    if (by === cy || by === cy + ch) bx = Math.max(cx + R, Math.min(cx + cw - R, bx));
+    if (bx === cx || bx === cx + cw) by = Math.max(cy + R, Math.min(cy + ch - R, by));
+    return { x: bx, y: by };
+  }
+
+  function updatePointers() {
+    const slots = window._pointerSlots;
+    if (!slots || !slots.length) return;
+    slots.forEach(s => {
+      const g    = document.getElementById(`ptr-${s.id}`);
+      const ln   = document.getElementById(`ptr-ln-${s.id}`);
+      const mo   = document.getElementById(`ptr-mo-${s.id}`);
+      const card = document.getElementById(s.id);
+      if (!g || !ln || !mo || !card) return;
+      const hidden = card.classList.contains('bg-dismissed') || card.classList.contains('dismissed');
+      g.style.opacity = hidden ? '0' : '1';
+      if (hidden) return;
+      const pt   = heroMap.latLngToContainerPoint(L.latLng(s.lat, s.lng));
+      const cx   = parseFloat(card.style.left) || 0;
+      const cy   = parseFloat(card.style.top)  || 0;
+      const cw   = card.offsetWidth  || 190;
+      const ch   = card.offsetHeight || 100;
+      const bp   = nearestBorderPoint(pt.x, pt.y, cx, cy, cw, ch, 10);
+      ln.setAttribute('x1', bp.x); ln.setAttribute('y1', bp.y);
+      ln.setAttribute('x2', pt.x); ln.setAttribute('y2', pt.y);
+      mo.setAttribute('cx', pt.x);
+      mo.setAttribute('cy', pt.y);
+    });
+  }
+
+  function drawPointers(slots) {
+    const container = document.getElementById('launch-cards');
+    const NS  = 'http://www.w3.org/2000/svg';
+    const old = document.getElementById('lcard-pointers');
+    if (old) old.remove();
+    const svg = document.createElementNS(NS, 'svg');
+    svg.id = 'lcard-pointers';
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:200;';
+    window._pointerSlots = slots.map(s => ({ id: s.id, lat: s.lat, lng: s.lng, color: s.color }));
+    slots.forEach(s => {
+      const g  = document.createElementNS(NS, 'g');
+      g.id = `ptr-${s.id}`;
+      g.style.transition = 'opacity 0.28s ease';
+      const ln = document.createElementNS(NS, 'line');
+      ln.id = `ptr-ln-${s.id}`;
+      ln.setAttribute('stroke',           'rgba(201,168,76,0.6)');
+      ln.setAttribute('stroke-width',     '1.5');
+      ln.setAttribute('stroke-linecap',   'round');
+      ln.setAttribute('stroke-dasharray', '5,4');
+      g.appendChild(ln);
+      const mo = document.createElementNS(NS, 'circle');
+      mo.id = `ptr-mo-${s.id}`;
+      mo.setAttribute('r', '4');
+      mo.setAttribute('fill', s.color);
+      mo.setAttribute('stroke', 'rgba(255,255,255,0.7)');
+      mo.setAttribute('stroke-width', '1.5');
+      g.appendChild(mo);
+      svg.appendChild(g);
+    });
+    container.appendChild(svg);
+    updatePointers();
+  }
+
+  function positionCards(cards) {
+    const mapEl = document.getElementById('hero-map');
+    const mapW  = mapEl.offsetWidth;
+    const mapH  = mapEl.offsetHeight;
+    const CARD_W = 190;
+    const GAP    = 48;
+    const PAD    = 14;
+    const LEFT_PAD  = window.innerWidth > 768 ? 280 : 0;
+    const RIGHT_PAD = window.innerWidth > 768 ? 280 : 0;
+
+    const slots = cards.map(c => {
+      const pt    = heroMap.latLngToContainerPoint(L.latLng(c.lat, c.lng));
+      const card  = document.getElementById(c.id);
+      const cardH = card ? card.offsetHeight : 160;
+      return {
+        id: c.id, color: c.color, lat: c.lat, lng: c.lng,
+        dotX: pt.x, dotY: pt.y, cardH,
+        finalX: Math.max(LEFT_PAD + PAD, Math.min(mapW - RIGHT_PAD - CARD_W - PAD, pt.x - CARD_W / 2)),
+        finalY: Math.max(PAD, pt.y - cardH - GAP),
+      };
+    });
+
+    for (let i = 0; i < slots.length; i++)
+      for (let j = i + 1; j < slots.length; j++)
+        if (Math.hypot(slots[i].dotX - slots[j].dotX, slots[i].dotY - slots[j].dotY) < 40) {
+          const mid = (slots[i].dotX + slots[j].dotX) / 2;
+          slots[i].finalX = mid - CARD_W - 6;
+          slots[j].finalX = mid + 6;
+        }
+
+    const yOverlap = (a, b) =>
+      Math.min(a.finalY + a.cardH, b.finalY + b.cardH) - Math.max(a.finalY, b.finalY) > 0;
+
+    slots.sort((a, b) => a.finalX - b.finalX);
+    for (let i = 1; i < slots.length; i++)
+      if (yOverlap(slots[i - 1], slots[i])) {
+        const needed = slots[i - 1].finalX + CARD_W + 10;
+        if (slots[i].finalX < needed) slots[i].finalX = needed;
       }
 
-      const membersEl = document.getElementById('home-members');
-      membersEl.innerHTML = members.slice(0, 4).map(renderMemberCard).join('');
-    } catch (e) {
-      console.error(e);
+    for (let i = slots.length - 1; i >= 0; i--) {
+      slots[i].finalX = Math.min(mapW - RIGHT_PAD - CARD_W - PAD, slots[i].finalX);
+      if (i > 0 && yOverlap(slots[i - 1], slots[i])) {
+        const minPrev = slots[i].finalX - CARD_W - 10;
+        if (slots[i - 1].finalX > minPrev) slots[i - 1].finalX = minPrev;
+      }
     }
+
+    slots.forEach(s => {
+      s.finalX = Math.max(LEFT_PAD + PAD, s.finalX);
+      s.finalY = Math.max(PAD, s.finalY);
+      const card = document.getElementById(s.id);
+      if (card) { card.style.left = s.finalX + 'px'; card.style.top = s.finalY + 'px'; }
+    });
+
+    drawPointers(slots);
   }
 
-  function renderEventCard(ev) {
-    const d = new Date(ev.date + 'T00:00:00');
-    const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
-    const day = d.getDate();
-    return `
-      <div class="card event-card">
-        <div class="event-date-badge">
-          <span class="month">${month}</span>
-          <span class="day">${day}</span>
+  function showNotecards(cards) {
+    const container = document.getElementById('launch-cards');
+    container.innerHTML = cards.map(c => `
+      <div class="launch-card" id="${c.id}" data-lat="${c.lat}" data-lng="${c.lng}">
+        <button class="lcard-close" onclick="event.stopPropagation();dismissCard('${c.id}')" aria-label="Dismiss">✕</button>
+        ${c.photo ? `<div class="lcard-photo"><img src="${c.photo}" alt="${c.title}" /></div>` : ''}
+        <div class="lcard-body">
+          <div class="lcard-label" style="color:${c.color};">${c.label}</div>
+          <div class="lcard-title">${c.title}</div>
+          ${c.meta ? `<div class="lcard-meta">📍 ${c.meta}</div>` : ''}
+          <a href="${c.href}" onclick="event.stopPropagation()" class="lcard-link" style="color:${c.color};border-color:${c.color};">View →</a>
         </div>
-        <h3>${ev.title}</h3>
-        <div class="event-meta">
-          <span>📍 ${ev.location}, ${ev.country}</span>
-          ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
-          ${ev.host_name ? `<span>👤 ${ev.host_name}</span>` : ''}
-        </div>
-        ${ev.description ? `<p>${ev.description}</p>` : ''}
-      </div>`;
+      </div>
+    `).join('');
+
+    requestAnimationFrame(() => {
+      positionCards(cards);
+      requestAnimationFrame(() => {
+        cards.forEach((c, i) => {
+          const card = document.getElementById(c.id);
+          if (card) card.style.transitionDelay = `${i * 90}ms`;
+        });
+        container.classList.add('visible');
+        const resetMs = (cards.length - 1) * 90 + 500;
+        setTimeout(() => {
+          cards.forEach(c => {
+            const card = document.getElementById(c.id);
+            if (card) card.style.transitionDelay = '0ms';
+          });
+          updatePointers();
+        }, resetMs);
+      });
+    });
   }
 
-  function renderMemberCard(m) {
-    const initials = m.name.split(' ').map(n => n[0]).join('');
-    return `
-      <div class="card member-card">
-        <div class="member-avatar">${initials}</div>
-        <h3>${m.name}</h3>
-        <div class="member-location">📍 ${m.location}, ${m.country}</div>
-        ${m.bio ? `<p>${m.bio}</p>` : ''}
-        ${m.joined_year ? `<span class="member-year">Member since ${m.joined_year}</span>` : ''}
-      </div>`;
+  // ── Load data + plot ──────────────────────────────────────────
+  async function loadMap() {
+    const [evRes, grpRes] = await Promise.all([
+      fetch('/api/events?upcoming=true'),
+      fetch('/api/groups'),
+    ]);
+    const events = await evRes.json();
+    const groups = await grpRes.json();
+
+    // Left sidebar: upcoming events
+    const evEl = document.getElementById('sidebar-events');
+    if (!events.length) {
+      evEl.innerHTML = '<div style="font-size:0.72rem;color:rgba(255,255,255,0.35);">No upcoming dinners yet.</div>';
+    } else {
+      evEl.innerHTML = events.map(ev => {
+        const d = new Date(ev.date + 'T00:00:00');
+        const dateStr = d.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        return `<div class="hero-sidebar-item">
+          <div class="hero-sidebar-dot" style="background:#f5d020;box-shadow:0 0 4px rgba(245,208,32,0.9);"></div>
+          <div class="hero-sidebar-body">
+            <div class="title">${ev.title}</div>
+            <div class="sub">${dateStr} · ${ev.location}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Right sidebar: groups
+    const grpEl = document.getElementById('sidebar-groups');
+    if (!groups.length) {
+      grpEl.innerHTML = '<div style="font-size:0.72rem;color:rgba(255,255,255,0.35);">No groups yet. <a href="/members.html" style="color:var(--gold);">Start one →</a></div>';
+    } else {
+      grpEl.innerHTML = groups.map(g => `
+        <div class="hero-sidebar-item">
+          ${g.photo_url
+            ? `<div class="group-thumb"><img src="${g.photo_url}" alt="${g.group_name}" /></div>`
+            : `<div class="group-thumb-placeholder">🌐</div>`}
+          <div class="hero-sidebar-body">
+            <div class="title">${g.group_name}</div>
+            <div class="sub">${g.town}${g.founder_name ? ' · ' + g.founder_name : ''}</div>
+          </div>
+        </div>`).join('');
+    }
+
+    // Plot markers + notecards
+    const notecards = [];
+    let reqCount = 0;
+
+    for (const ev of events) {
+      if (reqCount++ > 0) await new Promise(r => geocodeQueue = geocodeQueue.then(() => new Promise(rr => setTimeout(rr, 1100))));
+      const coords = await geocode(`${ev.location}, ${ev.country}`);
+      if (!coords) continue;
+      const d = new Date(ev.date + 'T00:00:00');
+      const dateStr = d.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' });
+      const marker = L.marker([coords.lat, coords.lng], { icon: makeMarkerIcon('ft-event-marker') })
+        .bindPopup(`<h4>${ev.title}</h4><p>📍 ${ev.location}, ${ev.country}<br>📅 ${dateStr}${ev.host_name ? '<br>👤 ' + ev.host_name : ''}</p>`, { className: 'ft-popup', maxWidth: 260, autoClose: false, closeOnClick: false })
+        .addTo(heroMap);
+      window._markerRefs[`ev-${ev.id}`] = marker;
+      if (notecards.length < 3) {
+        notecards.push({
+          id: `lcard-ev-${ev.id}`, lat: coords.lat, lng: coords.lng,
+          label: 'DINNER', color: '#f5d020',
+          title: ev.title,
+          meta: `${ev.location} · ${d.toLocaleDateString('en', { month: 'short', day: 'numeric' })}`,
+          href: '/events.html', photo: null,
+        });
+      }
+    }
+
+    for (const g of groups) {
+      const coords = await geocode(g.town);
+      if (!coords) continue;
+      const marker = L.marker([coords.lat, coords.lng], { icon: makeMarkerIcon('ft-group-marker') })
+        .bindPopup(`<h4>${g.group_name}</h4><p>📍 ${g.town}${g.founder_name ? '<br>👤 ' + g.founder_name : ''}${g.description ? '<br><em>' + g.description + '</em>' : ''}</p>`, { className: 'ft-popup', maxWidth: 260, autoClose: false, closeOnClick: false })
+        .addTo(heroMap);
+      window._markerRefs[`grp-${g.id}`] = marker;
+      if (notecards.length < 4) {
+        notecards.push({
+          id: `lcard-grp-${g.id}`, lat: coords.lat, lng: coords.lng,
+          label: 'GROUP', color: '#3ab86a',
+          title: g.group_name,
+          meta: g.town,
+          href: '/members.html',
+          photo: g.photo_url || null,
+        });
+      }
+    }
+
+    if (notecards.length) showNotecards(notecards);
   }
 
-  loadHomeData();
+  loadMap();
 </script>
 </body>
 </html>
