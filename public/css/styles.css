@@ -321,20 +321,21 @@ nav {
 
 .train-banner-caption {
   position: absolute;
-  top: 6%;
-  left: calc(50% - 240px);
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
   padding: 0;
   background: none;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
 }
 
 .train-banner-caption span {
-  font-size: 1.75vw;
+  font-size: 2vw;
   font-style: italic;
   color: #fff;
-  letter-spacing: 0.03em;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.95), 0 0 20px rgba(0,0,0,0.8);
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 40px rgba(0,0,0,0.9);
 }
 
 /* ─── CARDS ─── */

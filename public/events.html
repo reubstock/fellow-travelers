@@ -191,7 +191,7 @@
 
 <footer>
   <div class="footer-brand">✦ Fellow Travelers</div>
-  <p>Gathering since 2025 &middot; Wherever you roam, you are not alone.</p>
+  <p>Private homes. Honest company.</p>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -303,7 +303,7 @@
     const groups        = await grpRes.json();
 
     if (events.length === 0) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗓</div><p>No events found.</p></div>';
+      el.innerHTML = '<div class="empty-state"><p>No events found.</p></div>';
       plotMarkers(upcomingEvents, groups);
       return;
     }
@@ -321,10 +321,10 @@
           </div>
           <h3>${ev.title}</h3>
           <div class="event-meta">
-            <span>📍 ${ev.location}, ${ev.country}</span>
-            ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
-            ${ev.host_name ? `<span>👤 ${ev.host_name}</span>` : ''}
-            <span>📅 ${year}</span>
+            <span>${ev.location}, ${ev.country}</span>
+            ${ev.time ? `<span>${ev.time}</span>` : ''}
+            ${ev.host_name ? `<span>${ev.host_name}</span>` : ''}
+            <span>${year}</span>
           </div>
           ${ev.description ? `<p>${ev.description}</p>` : ''}
         </div>`;

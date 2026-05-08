@@ -130,7 +130,7 @@
 
 <footer>
   <div class="footer-brand">✦ Fellow Travelers</div>
-  <p>Gathering since 2025 &middot; Wherever you roam, you are not alone.</p>
+  <p>Private homes. Honest company.</p>
 </footer>
 
 <script src="/js/nav.js"></script>
@@ -148,10 +148,10 @@
       }
       el.innerHTML = groups.map(g => `
         <div class="card member-card">
-          ${g.photo_url ? `<div class="member-avatar" style="overflow:hidden;"><img src="${g.photo_url}" alt="${g.group_name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" /></div>` : `<div class="member-avatar" style="font-size:1.4rem;">🌐</div>`}
+          ${g.photo_url ? `<div class="member-avatar" style="overflow:hidden;"><img src="${g.photo_url}" alt="${g.group_name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" /></div>` : `<div class="member-avatar" style="font-size:1.4rem;background:rgba(58,184,106,0.15);color:#3ab86a;border-color:#3ab86a;">G</div>`}
           <h3>${g.group_name}</h3>
-          <div class="member-location">📍 ${g.town}</div>
-          ${g.founder_name ? `<div class="member-location" style="margin-top:0.25rem;">👤 ${g.founder_name}</div>` : ''}
+          <div class="member-location">${g.town}</div>
+          ${g.founder_name ? `<div class="member-location" style="margin-top:0.25rem;">${g.founder_name}</div>` : ''}
           ${g.description ? `<p style="margin-top:0.5rem;">${g.description}</p>` : ''}
         </div>`).join('');
     } catch (e) {
@@ -182,7 +182,7 @@
         <div class="card member-card">
           <div class="member-avatar">${m.avatar_url ? `<img src="${m.avatar_url}" alt="${m.name}" />` : initials}</div>
           <h3>${m.name}</h3>
-          <div class="member-location">📍 ${m.location}, ${m.country}</div>
+          <div class="member-location">${m.location}, ${m.country}</div>
           ${m.bio ? `<p>${m.bio}</p>` : ''}
           ${m.joined_year ? `<span class="member-year">Member since ${m.joined_year}</span>` : ''}
         </div>`;

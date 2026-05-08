@@ -82,7 +82,7 @@
 
 <footer>
   <div class="footer-brand">✦ Fellow Travelers</div>
-  <p>Gathering since 2025 &middot; Wherever you roam, you are not alone.</p>
+  <p>Private homes. Honest company.</p>
 </footer>
 
 <script src="/js/nav.js"></script>
@@ -122,9 +122,9 @@
         </div>
         <h3>${ev.title}</h3>
         <div class="event-meta">
-          <span>📍 ${ev.location}, ${ev.country}</span>
-          ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
-          ${ev.host_name ? `<span>👤 ${ev.host_name}</span>` : ''}
+          <span>${ev.location}, ${ev.country}</span>
+          ${ev.time ? `<span>${ev.time}</span>` : ''}
+          ${ev.host_name ? `<span>${ev.host_name}</span>` : ''}
         </div>
         ${ev.description ? `<p>${ev.description}</p>` : ''}
       </div>`;
@@ -136,7 +136,7 @@
       <div class="card member-card">
         <div class="member-avatar">${initials}</div>
         <h3>${m.name}</h3>
-        <div class="member-location">📍 ${m.location}, ${m.country}</div>
+        <div class="member-location">${m.location}, ${m.country}</div>
         ${m.bio ? `<p>${m.bio}</p>` : ''}
         ${m.joined_year ? `<span class="member-year">Member since ${m.joined_year}</span>` : ''}
       </div>`;
